@@ -8,6 +8,57 @@
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   .league-panel th:last-child, .league-panel td:last-child{ padding-left:16px; }
+
+  /* colores de liga en los cruces */
+  /* enlace al equipo */
+  .rk{ display:inline-block; min-width:20px; margin-right:6px; padding:0 4px; text-align:center; font-family:'Oswald',sans-serif; font-size:10px; line-height:16px; color:var(--chalk-dim); background:rgba(255,255,255,.08); border-radius:9px; vertical-align:middle; }
+  @media (max-width:520px){ .games-2col.xg{ grid-template-columns:1fr; } }
+  .team-link{ cursor:pointer; color:inherit; border-bottom:1px dotted var(--gold-dim); text-decoration:none; }
+  .team-link:hover{ color:var(--gold); border-bottom-color:var(--gold); }
+  /* marcadores con más peso (Clasificación en Vivo) */
+  .lvgame{ background:var(--field); border-radius:5px; margin-bottom:6px; padding:4px 7px 5px; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+  .lvside{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:2px 7px; border-radius:4px; cursor:pointer; }
+  .lvname .lg-dot{ margin:0 7px 0 0; }
+  .lvside:hover{ filter:brightness(1.15); }
+  .lvname{ font-size:12.5px; line-height:1.25; color:var(--chalk-dim); min-width:0; overflow-wrap:anywhere; }
+  .lvname small{ font-size:9.5px; opacity:.7; margin-left:5px; }
+  .lvscore{ font-family:'Oswald',sans-serif; font-size:15px; font-weight:500; font-variant-numeric:tabular-nums; color:var(--chalk-dim); }
+  .lvside.lead .lvname{ color:var(--chalk); font-weight:600; }
+  .lvside.lead .lvscore{ color:#8FCF9F; }
+  .lvbar{ display:flex; height:4px; border-radius:3px; overflow:hidden; margin:3px 2px 2px; background:rgba(255,255,255,.06); }
+  .lvbar span{ display:block; height:100%; transition:width .8s ease; }
+  .lvbar .ba{ background:var(--cardinal); } .lvbar .bb{ background:#4F7FA6; }
+  .lvbar.proj{ opacity:.45; }
+  .lvdiff{ font-size:9.5px; color:var(--chalk-dim); text-align:center; letter-spacing:.03em; min-height:0; line-height:1.1; margin-bottom:2px; }
+  .lvdiff:empty{ display:none; }
+  .lvdiff b{ color:var(--gold); font-weight:600; }
+  /* movimiento en vivo */
+  @keyframes flashUp{ 0%{ background:rgba(79,209,111,.55); } 100%{ background:transparent; } }
+  @keyframes flashDown{ 0%{ background:rgba(227,100,70,.5); } 100%{ background:transparent; } }
+  @keyframes tickPop{ 0%{ transform:scale(1.35); color:var(--gold); } 100%{ transform:scale(1); } }
+  @keyframes arrowBounce{ 0%,100%{ transform:translateY(0); } 40%{ transform:translateY(-4px); } 70%{ transform:translateY(2px); } }
+  #lv-body tr.flash-up td{ animation:flashUp 2.4s ease-out; }
+  #lv-body tr.flash-down td{ animation:flashDown 2.4s ease-out; }
+  #lv-body tr.flash-up .mv, #lv-body tr.flash-down .mv{ animation:arrowBounce 1s ease 2; }
+  #lv-body td.tick, .lvscore.tick{ display:inline-block; animation:tickPop .9s ease-out; }
+  #lv-body td.tick{ display:table-cell; }
+  .lvgame.swing{ animation:flashUp 2.4s ease-out; }
+  @media (min-width:900px){
+    #tab-vivo .vivo-split{ align-items:stretch; }
+    #tab-vivo .vivo-split .blk-games{ display:flex; flex-direction:column; min-height:0; }
+    #lv-games{ flex:1; display:flex; flex-direction:column; }
+    #lv-games .lvgame{ flex:1; display:flex; flex-direction:column; justify-content:center; margin-bottom:6px; }
+    #lv-games .lvgame:last-child{ margin-bottom:0; }
+  }
+  /* marcador Abuela Cuca vs Abuelo Jesus */
+  .lvmatch{ display:flex; align-items:center; justify-content:center; gap:12px; background:var(--field); border-radius:6px; padding:6px 10px; margin-bottom:8px; }
+  .lvmatch .ml{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--chalk-dim); }
+  .lvmatch .ml.r{ flex-direction:row-reverse; }
+  .lvmatch .mn{ font-family:'Oswald',sans-serif; font-size:24px; line-height:1; color:var(--chalk-dim); font-variant-numeric:tabular-nums; }
+  .lvmatch .ml.lead .mn{ color:#8FCF9F; } .lvmatch .ml.lead{ color:var(--chalk); font-weight:600; }
+  .lvmatch .mm{ color:var(--chalk-dim); font-size:16px; }
+  .lvmatch small{ display:block; font-size:9.5px; font-weight:400; opacity:.7; }
+  .lvacc{ text-align:center; font-size:10.5px; color:var(--chalk-dim); margin:-3px 0 8px; letter-spacing:.03em; }
   #tab-vivo .main-split{ margin-top:22px; }
   @media (min-width:900px){ .vivo-split{ grid-template-areas:"table games"; } }
   #lv-bar{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--chalk-dim); margin:-4px 0 10px; }
@@ -1410,20 +1461,21 @@ const crossSchedule = {"12": [["Pending Wiki", "TEPOS"], ["Real Bañil", "Luisra
   const el = document.getElementById('upcoming-games');
   const dot = c => `<span class="lg-dot lg-${c}"></span>`;
   const rec = n => { const t = teamByName[n]; return t ? `<small>${t.wins}-${t.losses}</small>` : ''; };
+  const rk = n => { const t = rankedCombined.find(x => x.name === n); return t ? `<span class="rk" title="Lugar en la tabla general">${t.overallRank}</span>` : ''; };
   const nextEl = document.getElementById('next-games'), nw = currentWeek + 1;
   if (nextEl) {
     document.getElementById('next-title').textContent = `Próximos Juegos · Semana ${nw}`;
     nextEl.innerHTML = crossSchedule[nw] ? '<div class="games-2col xg">' + crossSchedule[nw].map(([c, j]) => `
-      <div class="game"><div class="game-row"><span class="gname">${dot('cardinal')}${c}${rec(c)}</span></div>
-      <div class="game-row"><span class="gname">${dot('slate')}${j}${rec(j)}</span></div></div>`).join('') + '</div>' : '<div class="games-pending">Cruces por publicar.</div>';
+      <div class="game"><div class="game-row lgc-cardinal"><span class="gname">${rk(c)}${dot('cardinal')}${c}${rec(c)}</span></div>
+      <div class="game-row lgc-slate"><span class="gname">${rk(j)}${dot('slate')}${j}${rec(j)}</span></div></div>`).join('') + '</div>' : '<div class="games-pending">Cruces por publicar.</div>';
   }
   const weeks = Object.keys(crossSchedule).map(Number).filter(w => w > currentWeek).sort((a,b) => a - b);
   if (!weeks.length) { el.innerHTML = '<div class="games-pending">Temporada cruzada terminada.</div>'; return; }
   el.innerHTML = '<div class="xweeks">' + weeks.map(w => `
     <div class="xweek"><div class="games-col-title xw"><span>Semana ${w}</span></div>
     <div class="xg">` + crossSchedule[w].map(([c, j]) => `
-      <div class="game"><div class="game-row"><span class="gname">${dot('cardinal')}${c}${rec(c)}</span></div>
-      <div class="game-row"><span class="gname">${dot('slate')}${j}${rec(j)}</span></div></div>`).join('') + `</div></div>`).join('') + '</div>';
+      <div class="game"><div class="game-row lgc-cardinal"><span class="gname">${rk(c)}${dot('cardinal')}${c}${rec(c)}</span></div>
+      <div class="game-row lgc-slate"><span class="gname">${rk(j)}${dot('slate')}${j}${rec(j)}</span></div></div>`).join('') + `</div></div>`).join('') + '</div>';
 })();
 
 // ---- Golpe de Realidad: highlight manual, negativo (edítalo cada semana) ----
@@ -2086,7 +2138,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       <div class="rbody">${body}</div></div>`;
   }
   document.addEventListener('click', e => {
-    const s = e.target.closest('.slot[data-team], .game-row[data-team]'); if (s) return openRoster(s.dataset.team);
+    const s = e.target.closest('.slot[data-team], .game-row[data-team], .team-link[data-team], .lvside[data-team]'); if (s) return openRoster(s.dataset.team);
     const td = e.target.closest('#rankings-body td:nth-child(2)'); if (td && T(td.textContent.trim())) openRoster(td.textContent.trim());
   });
 
@@ -2195,19 +2247,32 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   const pct = p => p < 0.005 ? '<1%' : Math.min(99, Math.round(p * 100)) + '%';
   const probTxt = (r, i) => r.clin[i] ? '100%' : r.elim[i] ? '0%' : pct(r.prob[i]);
 
+  let prevTable = {}, prevScore = {}, prevLead = {};
   function renderTable(r, L){
     const mv = d => d > 0 ? `<div class="mv up">▲${d}</div>` : d < 0 ? `<div class="mv down">▼${-d}</div>` : '<div class="mv same">—</div>';
     document.getElementById('lv-body').innerHTML = r.order.map((i, pos) => {
       const t = base[i], rank = pos + 1;
       return `<tr>
         <td class="rank-big row-${rank <= 8 ? 'playoff' : 'out'}"><div>${rank}</div>${mv(t.rank - rank)}</td>
-        <td>${esc(t.name)}</td>
+        <td><a class="team-link" data-team="${esc(t.name)}" title="Ver alineación">${esc(t.name)}</a></td>
         <td><span class="pill ${t.tag}">${esc(t.league)}</span></td>
-        <td class="num">${r.Wv[i]}-${r.Lv[i]}</td>
-        <td class="num">${r.Pv[i].toFixed(1)}</td>
+        <td class="num c-rec">${r.Wv[i]}-${r.Lv[i]}</td>
+        <td class="num c-pts">${r.Pv[i].toFixed(1)}</td>
         <td class="num prob-c">${probTxt(r, i)}</td>
       </tr>`;
     }).join('');
+    // movimiento en vivo: compara contra la actualización anterior
+    const now = {};
+    document.querySelectorAll('#lv-body tr').forEach((tr, pos) => {
+      const i = r.order[pos], nm = base[i].name;
+      now[nm] = { rank: pos + 1, rec: r.Wv[i] + '-' + r.Lv[i], pts: r.Pv[i].toFixed(1) };
+      const pv = prevTable[nm]; if (!pv) return;
+      if (now[nm].rank < pv.rank) tr.classList.add('flash-up');
+      else if (now[nm].rank > pv.rank) tr.classList.add('flash-down');
+      if (now[nm].pts !== pv.pts) tr.querySelector('.c-pts').classList.add('tick');
+      if (now[nm].rec !== pv.rec) tr.querySelector('.c-rec').classList.add('tick');
+    });
+    prevTable = now;
     document.getElementById('lv-legend').innerHTML = '<span class="swatch"></span> = zona de playoffs (top 8) · ▲▼ = lugares vs. la tabla oficial de la semana ' + currentWeek + ' · Prob. = probabilidad simulada de entrar al top 8';
   }
 
@@ -2238,15 +2303,42 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       const c = cell(name), pts = c && c.pts != null ? c.pts : null, pj = c && c.proj != null && !fin ? c.proj : null;
       return { name, pts, pj };
     };
-    const rowHTML = (x, state) => `<div class="game-row ${state}" data-team="${esc(x.name)}" title="Ver alineación"><span class="gname">${esc(x.name)}${x.pj != null && x.pj > 0 ? `<small class="pj">proy. ${x.pj.toFixed(1)}</small>` : ''}</span><span class="gscore">${x.pts == null ? '—' : x.pts.toFixed(2)}</span></div>`;
+    const recOf = nm => { const t = base[idx[nm]]; return t ? t.w + '-' + t.l : ''; };
+    const sideHTML = (x, lg, lead) => `<div class="lvside ${lg} ${lead ? 'lead' : ''}" data-team="${esc(x.name)}" title="Ver alineación"><div class="lvname"><span class="lg-dot ${lg === 'lgc-cardinal' ? 'lg-cardinal' : 'lg-slate'}"></span>${esc(x.name)}<small>${recOf(x.name)}${x.pj != null && x.pj > 0 ? ' · proy. ' + x.pj.toFixed(1) : ''}</small></div><div class="lvscore" data-nm="${esc(x.name)}">${x.pts == null ? '—' : x.pts.toFixed(2)}</div></div>`;
     const lines = (crossSchedule[wk] || []).map(([a, b]) => {
       const A = side(a), B = side(b);
-      const lead = A.pts != null && B.pts != null && A.pts !== B.pts ? (A.pts > B.pts ? 'a' : 'b') : null;
-      const st = (who) => (!started && !fin) ? '' : (lead === who ? 'win' : lead ? 'lose' : '');
-      return `<div class="game lg-cardinal">${rowHTML(A, st('a'))}${rowHTML(B, st('b'))}</div>`;
+      const has = A.pts != null && B.pts != null && A.pts + B.pts > 0;
+      const lead = has && A.pts !== B.pts ? (A.pts > B.pts ? 'a' : 'b') : null;
+      let pa = 50, mode = '', diff = '';
+      if (has) { pa = (A.pts / (A.pts + B.pts)) * 100; if (lead) diff = `<b>${lead === 'a' ? esc(A.name) : esc(B.name)}</b> +${Math.abs(A.pts - B.pts).toFixed(2)}`; }
+      else if (A.pj > 0 && B.pj > 0) { pa = (A.pj / (A.pj + B.pj)) * 100; mode = 'proj'; diff = 'proyección'; }
+      const key = a + '|' + b, swing = prevLead[key] && lead && prevLead[key] !== lead;
+      prevLead[key] = lead || prevLead[key];
+      return `<div class="lvgame ${swing ? 'swing' : ''}">${sideHTML(A, 'lgc-cardinal', lead === 'a')}<div class="lvbar ${mode}"><span class="ba" style="width:${pa.toFixed(1)}%"></span><span class="bb" style="width:${(100 - pa).toFixed(1)}%"></span></div><div class="lvdiff">${diff}</div>${sideHTML(B, 'lgc-slate', lead === 'b')}</div>`;
     }).join('');
+    const tally = (w) => {
+      const t = { c: 0, j: 0, pc: 0, pj: 0 };
+      (crossSchedule[w] || []).forEach(([a, b]) => {
+        const ca = ok && L.scores[a] && L.scores[a][w], cb = ok && L.scores[b] && L.scores[b][w];
+        if (!ca || !cb || ca.pts == null || cb.pts == null || ca.pts + cb.pts <= 0) return;
+        t.pc += ca.pts; t.pj += cb.pts;
+        const caWins = ca.pts === cb.pts ? base[idx[a]].rank < base[idx[b]].rank : ca.pts > cb.pts;
+        if (caWins) t.c++; else t.j++;
+      });
+      return t;
+    };
+    const tw = tally(wk); let ac = 0, aj = 0;
+    CW.filter(w => w <= wk).forEach(w => { const x = tally(w); ac += x.c; aj += x.j; });
+    const lc = tw.c > tw.j ? 'lead' : '', lj = tw.j > tw.c ? 'lead' : '';
+    const matchHTML = `<div class="lvmatch"><div class="ml ${lc}"><span class="lg-dot lg-cardinal"></span><span>Abuela Cuca<small>${tw.pc.toFixed(1)} pts</small></span><span class="mn">${tw.c}</span></div><span class="mm">–</span><div class="ml r ${lj}"><span class="lg-dot lg-slate"></span><span style="text-align:right">Abuelo Jesus<small>${tw.pj.toFixed(1)} pts</small></span><span class="mn">${tw.j}</span></div></div>` +
+      (wk > 12 ? `<div class="lvacc">Acumulado S12–S${wk}: Abuela Cuca ${ac} – ${aj} Abuelo Jesus</div>` : '');
     const state = !ok ? 'Sin conexión con Sleeper todavía' : fin ? 'Semana terminada' : started ? 'En juego' : 'Por jugar';
-    document.getElementById('lv-games').innerHTML = `<div class="wk-state">${state}</div>${lines || '<div class="games-pending">Sin juegos.</div>'}`;
+    document.getElementById('lv-games').innerHTML = `<div class="wk-state">${state}</div>${matchHTML}${lines || '<div class="games-pending">Sin juegos.</div>'}`;
+    document.querySelectorAll('#lv-games .lvscore').forEach(el => {
+      const nm = el.dataset.nm, v = el.textContent;
+      if (prevScore[nm] !== undefined && prevScore[nm] !== v) el.classList.add('tick');
+      prevScore[nm] = v;
+    });
   }
 
   function bar(L){
