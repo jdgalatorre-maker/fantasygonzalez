@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liga Combinada — En Vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10231A;
+    --field:#1B3A2C;
+    --chalk:#F4F1E8;
+    --chalk-dim:#C9C3B2;
+    --line:#2E4E3E;
+    --gold:#C9A227;
+    --gold-dim:#8A701D;
+    --cardinal:#B5502D;
+    --slate:#2C4A63;
+    --win:#4C8C5C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--chalk);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+  }
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:0 24px 80px;
+  }
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead{
+    padding:36px 24px 0;
+    margin-bottom:0;
+    background:linear-gradient(180deg, rgba(201,162,39,0.08), transparent);
+  }
+  .masthead-inner{
+    max-width:1080px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    padding-bottom:24px;
+  }
+  .masthead h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:600;
+    font-size:clamp(28px,4vw,44px);
+    letter-spacing:0.02em;
+    text-transform:uppercase;
+    margin:0;
+    color:var(--chalk);
+  }
+  .masthead .sub{
+    color:var(--chalk-dim);
+    font-size:14px;
+    margin-top:6px;
+  }
+  .week-tag{
+    font-family:'Oswald',sans-serif;
+    font-size:15px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold);
+    border:1px solid var(--gold-dim);
+    padding:6px 14px;
+    border-radius:2px;
+  }
+
+  /* ---------- TABS ---------- */
+  .tabs{
+    max-width:1080px;
+    margin:0 auto;
+    display:flex;
+    gap:4px;
+    padding:0 24px;
+    border-bottom:3px solid var(--gold);
+    overflow-x:auto;
+    overflow-y:hidden;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{ display:none; }
+  @media (max-width:520px){
+    .tabs{ padding:0 14px; }
+    .tab-btn{ padding:12px 14px !important; font-size:14px !important; }
+  }
+  .tab-btn{
+    white-space:nowrap;
+    flex-shrink:0;
+    font-family:'Oswald',sans-serif;
+    font-size:15px;
+    letter-spacing:0.03em;
+    background:none;
+    border:none;
+    color:var(--chalk-dim);
+    padding:12px 20px;
+    cursor:pointer;
+    border-radius:3px 3px 0 0;
+    position:relative;
+    top:3px;
+    transition:color 0.15s ease, background 0.15s ease;
+  }
+  .tab-btn:hover{ color:var(--chalk); }
+  .tab-btn.active{
+    color:var(--ink);
+    background:var(--gold);
+    font-weight:500;
+  }
+  .tab-btn .tab-dot{
+    display:inline-block;
+    width:8px;height:8px;border-radius:50%;
+    margin-right:8px;
+    background:currentColor;
+    opacity:0.6;
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  section{margin-bottom:56px;}
+  section:first-child{margin-top:40px;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .section-head h2{
+    font-family:'Oswald',sans-serif;
+    font-weight:500;
+    font-size:22px;
+    margin:0;
+    color:var(--chalk);
+  }
+  .section-head .note{
+    color:var(--chalk-dim);
+    font-size:13px;
+  }
+
+  /* ---------- STANDINGS (single-league tab view) ---------- */
+  .league-panel{
+    background:var(--field);
+    border-left:4px solid var(--panel-color, var(--gold));
+    border-radius:2px;
+    padding:18px 20px 8px;
+  }
+  .league-panel h3{
+    font-family:'Oswald',sans-serif;
+    font-weight:500;
+    font-size:17px;
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--panel-color, var(--gold));
+    display:inline-block;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+  }
+  th{
+    text-align:left;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:11px;
+    color:var(--chalk-dim);
+    padding-bottom:8px;
+    border-bottom:1px solid var(--line);
+  }
+  td{
+    padding:9px 4px;
+    border-bottom:1px solid var(--line);
+  }
+  tr:last-child td{border-bottom:none;}
+  th.num, td.num{text-align:right;}
+  td.prob-c{opacity:.8; font-size:.92em;}
+  .rank-num{
+    font-family:'Oswald',sans-serif;
+    color:var(--chalk-dim);
+    width:18px;
+    display:inline-block;
+  }
+  .status-badge{
+    font-family:'Inter',sans-serif;
+    font-size:10.5px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:20px;
+    display:inline-block;
+    white-space:nowrap;
+  }
+  .status-badge.st-bye{ background:rgba(201,162,39,0.22); color:var(--gold); }
+  .status-badge.st-playoff{ background:rgba(76,140,92,0.22); color:#8FCF9F; }
+  .status-badge.st-out{ background:rgba(201,195,178,0.12); color:var(--chalk-dim); }
+  .cutoff-row td{
+    padding:6px 4px;
+    border-bottom:1px dashed var(--gold-dim);
+    font-family:'Oswald',sans-serif;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gold);
+    text-align:center;
+  }
+
+  /* Highlight box for a manager's headline stat on their own tab */
+  .headline-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-bottom:24px;
+  }
+  @media (max-width:640px){ .headline-row{ grid-template-columns:1fr; } }
+  .stat-card{
+    background:var(--field);
+    border-radius:2px;
+    padding:16px 18px;
+    border-left:4px solid var(--panel-color, var(--gold));
+  }
+  .stat-card .label{
+    font-size:11px;
+    color:var(--chalk-dim);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .stat-card .value{
+    font-family:'Oswald',sans-serif;
+    font-size:26px;
+    margin-top:4px;
+  }
+
+  /* ---------- WEEKLY RECAP: TWO COLUMNS ---------- */
+  .recap-intro{
+    color:var(--chalk-dim);
+    font-size:14px;
+    margin:-8px 0 20px;
+  }
+  .recap-columns{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:720px){
+    .recap-columns{ grid-template-columns:1fr; }
+  }
+  .recap-col{
+    background:var(--field);
+    border-radius:2px;
+    padding:16px 18px 6px;
+  }
+  .recap-col h3{
+    font-family:'Oswald',sans-serif;
+    font-weight:500;
+    font-size:16px;
+    margin:0 0 14px;
+    color:var(--chalk);
+  }
+  .leader-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .leader-row:last-child{ border-bottom:none; }
+  .leader-medal{ font-size:20px; line-height:1.3; }
+  .leader-info{ flex:1; min-width:0; }
+  .leader-name{
+    font-family:'Oswald',sans-serif;
+    font-size:15px;
+    color:var(--chalk);
+  }
+  .leader-meta{
+    font-size:11px;
+    color:var(--chalk-dim);
+    margin-top:1px;
+  }
+  .leader-joke{
+    font-size:12px;
+    color:var(--chalk-dim);
+    margin-top:4px;
+    line-height:1.4;
+  }
+  .leader-pts{
+    font-family:'Oswald',sans-serif;
+    font-size:19px;
+    color:var(--gold);
+    white-space:nowrap;
+  }
+  .recap-quote{
+    font-style:italic;
+    color:var(--gold);
+    font-size:13.5px;
+    margin:-10px 0 14px;
+  }
+  .recap-note{
+    font-size:11.5px;
+    color:var(--chalk-dim);
+    font-style:italic;
+    margin:10px 0 4px;
+  }
+  .recap-spotlight{
+    margin-top:16px;
+    background:linear-gradient(135deg, rgba(181,80,45,0.14), var(--field));
+    border-left:4px solid var(--cardinal);
+    border-radius:2px;
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .recap-spotlight .spotlight-emoji{ font-size:26px; }
+  .recap-spotlight .spotlight-body{ flex:1; }
+  .recap-spotlight .spotlight-title{
+    font-family:'Oswald',sans-serif;
+    font-size:13px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:#E39A7C;
+  }
+  .recap-spotlight .spotlight-text{
+    font-size:13px;
+    color:var(--chalk-dim);
+    margin-top:2px;
+  }
+  .recap-spotlight .spotlight-pts{
+    font-family:'Oswald',sans-serif;
+    font-size:22px;
+    color:var(--chalk);
+    white-space:nowrap;
+  }
+  /* ---------- RESULTADOS / JUEGOS DE LA SEMANA ---------- */
+  .games-columns{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:720px){ .games-columns{ grid-template-columns:1fr; } }
+  .games-panel{
+    background:var(--field);
+    border-left:4px solid var(--panel-color, var(--gold));
+    border-radius:2px;
+    padding:14px 16px 6px;
+  }
+  .games-panel h3{
+    font-family:'Oswald',sans-serif;
+    font-weight:500;
+    font-size:15px;
+    margin:0 0 8px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .game{
+    padding:3px 10px;
+    margin-bottom:4px;
+    background:var(--field);
+    border-left:3px solid var(--line);
+    border-radius:2px;
+  }
+  .game.lg-cardinal{ border-left-color:var(--cardinal); }
+  .game.lg-slate{ border-left-color:var(--slate); }
+  .games-group{ margin-bottom:16px; }
+  .games-2col{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .games-col{ min-width:0; }
+  .games-col-title{
+    display:flex; align-items:center; gap:6px;
+    font-size:11px; color:var(--chalk-dim);
+    margin-bottom:6px;
+  }
+  .games-col-title .lg-dot{ margin-left:0; }
+  .games-2col .gname{ min-width:0; overflow-wrap:anywhere; }
+  .group-title{
+    font-family:'Oswald',sans-serif;
+    font-weight:500;
+    font-size:15px;
+    margin:0 0 8px;
+    color:var(--gold);
+  }
+  .games-legend{ display:flex; align-items:center; gap:6px; white-space:nowrap; }
+  .lg-dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-left:6px; }
+  .lg-dot.lg-cardinal{ background:var(--cardinal); }
+  .lg-dot.lg-slate{ background:var(--slate); }
+  .game-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:10px;
+    font-size:12.5px;
+    line-height:1.3;
+    padding:1px 0;
+  }
+  .game-row + .game-row{ border-top:1px dashed var(--line); }
+  .game-row .gscore{
+    font-family:'Oswald',sans-serif;
+    font-size:14px;
+    white-space:nowrap;
+  }
+  .game-row.win .gname{ color:var(--chalk); font-weight:600; }
+  .game-row.win .gscore{ color:#8FCF9F; }
+  .game-row.lose{ color:var(--chalk-dim); }
+  .game-row.bye .gname{ font-style:italic; color:var(--chalk-dim); }
+  .game-row small{ font-size:10.5px; color:var(--chalk-dim); margin-left:6px; }
+  .game-vs{
+    font-family:'Oswald',sans-serif;
+    font-size:9.5px;
+    letter-spacing:0.1em;
+    color:var(--chalk-dim);
+    opacity:0.6;
+    margin:1px 0;
+  }
+  .games-pending{
+    font-size:12.5px;
+    color:var(--chalk-dim);
+    font-style:italic;
+    padding:6px 0 12px;
+  }
+  .move-blocks{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:12px;
+  }
+  .move-card{
+    background:var(--field);
+    border-radius:2px;
+    padding:7px 8px 7px;
+    text-align:center;
+    border-top:3px solid var(--line);
+  }
+  .move-card.down{
+    border-top-color:var(--cardinal);
+    background:linear-gradient(135deg, rgba(181,80,45,0.16), var(--field));
+  }
+  .move-card.up{
+    border-top-color:var(--win);
+    background:linear-gradient(135deg, rgba(76,140,92,0.18), var(--field));
+  }
+  .move-title{
+    font-family:'Oswald',sans-serif;
+    font-size:10.5px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+  }
+  .move-card.down .move-title{ color:#E39A7C; }
+  .move-card.up .move-title{ color:#8FCF9F; }
+  .move-num{
+    font-family:'Oswald',sans-serif;
+    font-size:26px;
+    font-weight:600;
+    line-height:1;
+    margin:3px 0 3px;
+  }
+  .move-num .arrow{ font-size:12px; vertical-align:middle; margin-right:2px; }
+  .move-card.down .move-num{ color:#E39A7C; }
+  .move-card.up .move-num{ color:#8FCF9F; }
+  .move-teams{ font-size:12px; color:var(--chalk); }
+  .move-teams .nm{ white-space:nowrap; }
+  .move-teams small{ display:block; font-size:10.5px; color:var(--chalk-dim); }
+  .move-empty{ font-size:12px; color:var(--chalk-dim); padding:10px 0 4px; }
+  .recap-spotlight.positive{
+    background:linear-gradient(135deg, rgba(76,140,92,0.16), var(--field));
+    border-left-color: var(--win);
+    margin-top:12px;
+  }
+  .recap-spotlight.positive .spotlight-title{ color:#8FCF9F; }
+  .recap-spotlight.upcoming{
+    background:linear-gradient(135deg, rgba(201,162,39,0.14), var(--field));
+    border-left-color: var(--gold);
+    margin-top:12px;
+  }
+  .recap-spotlight.upcoming .spotlight-title{ color:var(--gold); }
+  .ledger{
+    background:var(--field);
+    border-radius:2px;
+    overflow:hidden;
+    max-width:680px;
+    margin:0 auto;
+  }
+  .ledger table{font-size:12.5px;}
+  .ledger th{padding:8px 12px 7px; font-size:10px;}
+  .ledger td{padding:7px 12px;}
+  .ledger .rank-big{
+    font-family:'Oswald',sans-serif;
+    font-size:15px;
+    color:var(--gold);
+    width:24px;
+  }
+  .ledger td.rank-big.row-bye,
+  .ledger td.rank-big.row-playoff{
+    border-left:3px solid var(--gold);
+    padding-left:9px;
+  }
+  .ledger td.rank-big.row-out{
+    border-left:3px solid transparent;
+  }
+  .ledger{ overflow-x:auto; }
+  @media (max-width:520px){
+    .wrap{ padding-left:14px; padding-right:14px; }
+    .ledger table{ font-size:11.5px; }
+    .ledger th, .ledger td{ padding-left:3px; padding-right:3px; }
+    .ledger th.num:last-child, .ledger td.prob-c{ padding-right:6px; }
+    .ledger td.rank-big{ padding-left:6px; width:20px; }
+    .ledger .pill{ font-size:8.5px; padding:2px 4px; white-space:nowrap; }
+  }
+  .ledger td.rank-big .mv{
+    font-family:'Inter',sans-serif;
+    font-size:9px;
+    font-weight:600;
+    line-height:1.1;
+    margin-top:1px;
+    white-space:nowrap;
+  }
+  .ledger td.rank-big .mv.up{ color:#8FCF9F; }
+  .ledger td.rank-big .mv.down{ color:#E39A7C; }
+  .ledger td.rank-big .mv.same{ color:var(--chalk-dim); }
+  .ledger td.streak-w{ color:#8FCF9F; font-weight:600; }
+  .ledger td.streak-l{ color:#E39A7C; font-weight:600; }
+  .main-split{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:18px;
+    margin-bottom:32px;
+    align-items:start;
+  }
+  /* teléfono: las columnas "desaparecen" y los bloques se intercalan en este orden */
+  .main-split .split-left, .main-split .split-right{ display:contents; }
+  #tab-resumen .main-split{ margin-top:22px; }
+  .main-split section{ margin:0 !important; }
+  .main-split .ledger{ max-width:none; margin:0; }
+  .main-split > *, .blk-status{ min-width:0; max-width:100%; }
+  .blk-status section + section{ margin-top:18px !important; }
+  .blk-recap{ order:1; } .blk-status{ order:2; } .blk-table{ order:3; } .blk-games{ order:4; }
+  .blk-recap .section-head, .blk-status .section-head{ margin-bottom:10px; }
+  .blk-recap .recap-cards{ gap:10px; }
+  .blk-recap .move-blocks{ margin-top:0; }
+  .blk-status .section-head{ flex-wrap:wrap; row-gap:4px; }
+  .blk-recap .section-head h2, .blk-status .section-head h2{ font-size:24px; }
+  .recap-cards{ display:grid; grid-template-columns:1fr; gap:12px; }
+  .recap-cards #recap-applause{ display:contents; }
+  .recap-cards .recap-spotlight{ margin-top:0 !important; }
+  @media (min-width:720px){ .recap-cards{ grid-template-columns:1fr 1fr; } }
+  .status-cols{ display:grid; grid-template-columns:1fr; gap:12px; }
+  @media (min-width:640px){ .status-cols{ grid-template-columns:repeat(3,1fr); } }
+  .status-col{
+    background:var(--field);
+    border-radius:2px;
+    border-top:3px solid var(--line);
+    padding:12px 14px 8px;
+  }
+  .status-col.sc-in{ border-top-color:var(--win); background:linear-gradient(135deg, rgba(76,140,92,0.16), var(--field)); }
+  .status-col.sc-hunt{ border-top-color:var(--gold); background:linear-gradient(135deg, rgba(201,162,39,0.12), var(--field)); }
+  .status-col.sc-out{ border-top-color:var(--cardinal); background:linear-gradient(135deg, rgba(181,80,45,0.16), var(--field)); }
+  .status-title{
+    font-family:'Oswald',sans-serif;
+    font-size:15px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:8px;
+  }
+  .sc-in .status-title{ color:#8FCF9F; }
+  .sc-hunt .status-title{ color:var(--gold); }
+  .sc-out .status-title{ color:#E39A7C; }
+  .status-count{ font-size:13px; color:var(--chalk-dim); }
+  .status-sub{ font-size:11px; color:var(--chalk-dim); margin:2px 0 8px; }
+  .status-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:5px 0;
+    border-top:1px dashed var(--line);
+    font-size:13px;
+  }
+  .status-row .nm{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .status-row .rec{ font-family:'Oswald',sans-serif; font-size:13px; color:var(--chalk-dim); white-space:nowrap; }
+  .status-row .lg-dot{ margin-left:0; flex-shrink:0; }
+  .status-bye{
+    font-size:9px; font-weight:600; letter-spacing:0.06em;
+    color:var(--gold); border:1px solid var(--gold-dim);
+    border-radius:10px; padding:1px 6px; white-space:nowrap;
+  }
+  .status-empty{ font-size:12px; color:var(--chalk-dim); font-style:italic; padding:6px 0 4px; }
+  @media (min-width:900px){
+    .main-split{
+      grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+      grid-template-areas:"recap recap" "status status" "table games";
+    }
+    .blk-recap{ grid-area:recap; order:0; }
+    .blk-status{ grid-area:status; order:0; }
+    .blk-table{ grid-area:table; order:0; }
+    .blk-games{ grid-area:games; order:0; }
+  }
+  .ledger-legend{
+    font-size:11px;
+    color:var(--chalk-dim);
+    padding:8px 16px 4px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .ledger-legend .swatch{
+    display:inline-block;
+    width:10px; height:10px;
+    border-left:3px solid var(--gold);
+  }
+  .pill{
+    font-family:'Inter',sans-serif;
+    font-size:11px;
+    font-weight:600;
+    padding:3px 8px;
+    border-radius:20px;
+    display:inline-block;
+  }
+  .pill.cardinal{background:rgba(181,80,45,0.22);color:#E39A7C;}
+  .pill.slate{background:rgba(44,74,99,0.28);color:#8FB4D4;}
+
+  /* ---------- BRACKET ---------- */
+  .bracket-panel{
+    background:linear-gradient(180deg, rgba(0,0,0,0.15), transparent 40%), var(--ink);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 10px;
+  }
+  .bracket-scroll{
+    overflow-x:auto;
+    padding-bottom:12px;
+  }
+  .bracket{
+    display:flex;
+    gap:30px;
+    min-width:680px;
+    padding:6px 4px 2px;
+  }
+  .round{
+    display:flex;
+    flex-direction:column;
+    justify-content:space-around;
+    flex:1;
+    min-width:140px;
+  }
+  .round-label{
+    font-family:'Oswald',sans-serif;
+    font-size:10.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+    text-align:center;
+    margin-bottom:8px;
+    padding-bottom:5px;
+    border-bottom:2px solid var(--gold-dim);
+  }
+  .matchup{
+    position:relative;
+    margin:8px 0;
+  }
+  .matchup .connector{
+    position:absolute;
+    right:-30px;
+    top:0;
+    bottom:0;
+    width:30px;
+    pointer-events:none;
+  }
+  .matchup .connector::before{
+    content:"";
+    position:absolute;
+    right:15px;
+    top:0;
+    bottom:0;
+    width:0;
+    border-right:2px solid var(--gold-dim);
+    border-radius:2px;
+  }
+  .matchup .connector::after{
+    content:"";
+    position:absolute;
+    right:0;
+    top:50%;
+    width:15px;
+    height:0;
+    border-top:2px solid var(--gold-dim);
+  }
+  .slot{
+    background:linear-gradient(135deg, rgba(255,255,255,0.04), transparent), var(--field);
+    border-radius:5px;
+    padding:5px 8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    border-left:3px solid transparent;
+    box-shadow:0 1px 3px rgba(0,0,0,0.25);
+  }
+  .vs-divider{
+    text-align:center;
+    font-family:'Oswald',sans-serif;
+    font-size:8.5px;
+    letter-spacing:0.1em;
+    color:var(--chalk-dim);
+    margin:1px 0;
+    opacity:0.6;
+  }
+  .slot.cardinal-seed{border-left-color:var(--cardinal);}
+  .slot.slate-seed{border-left-color:var(--slate);}
+  .slot .seed{
+    color:var(--chalk);
+    font-family:'Oswald',sans-serif;
+    font-size:9px;
+    min-width:18px;
+    height:16px;
+    padding:0 4px;
+    flex-shrink:0;
+    border-radius:10px;
+    background:rgba(255,255,255,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .slot .name{flex:1;}
+  .slot.tbd{ opacity:0.7; font-style:italic; }
+  .champion-block{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-width:120px;
+    gap:6px;
+    text-align:center;
+  }
+  .trophy-icon{ font-size:24px; line-height:1; }
+  .trophy-label{
+    font-family:'Oswald',sans-serif;
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
+  .champion-name{
+    font-family:'Oswald',sans-serif;
+    font-size:14px;
+    color:var(--chalk);
+    border:1px solid var(--gold);
+    padding:8px 12px;
+    border-radius:6px;
+    background:radial-gradient(ellipse at top, rgba(201,162,39,0.18), rgba(201,162,39,0.06));
+    box-shadow:0 2px 10px rgba(201,162,39,0.15);
+  }
+
+  /* Local color override so the Camote Bowl reuses all bracket styles
+     with a "sweet potato" palette instead of championship gold. */
+  .camote-theme{
+    --gold:#D98B3F;
+    --gold-dim:#8C5A22;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--chalk-dim);
+    font-size:12px;
+    margin-top:40px;
+  }
+
+  .template-banner{
+    background:rgba(201,162,39,0.12);
+    border:1px dashed var(--gold-dim);
+    color:var(--chalk-dim);
+    font-size:13px;
+    padding:12px 16px;
+    border-radius:2px;
+    margin:24px 0 12px;
+  }
+  .template-banner code{color:var(--gold);}
+</style>
+</head>
+<body>
+<div class="masthead">
+  <div class="masthead-inner">
+    <div>
+      <h1>Reporte de Liga Combinada</h1>
+      <div class="sub">Abuela Cuca &amp; Abuelo Jesus — una sola clasificacion, un solo bracket</div>
+    </div>
+    <div class="week-tag" id="week-tag">Semana 14 · Datos de ejemplo</div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="resumen"><span class="tab-dot"></span>Resumen Semanal</button>
+    <button class="tab-btn" data-tab="cuca"><span class="tab-dot"></span>Abuela Cuca</button>
+    <button class="tab-btn" data-tab="jesus"><span class="tab-dot"></span>Abuelo Jesus</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- TAB 1: RESUMEN SEMANAL -->
+  <div class="tab-panel active" id="tab-resumen">
+
+    <div class="main-split">
+      <div class="split-left">
+        <div class="blk-recap">
+    <section id="recap-section">
+      <div class="section-head">
+        <h2>Recap de la Semana</h2>
+      </div>
+      <div class="recap-cards">
+        <div id="recap-applause"></div>
+        <div class="recap-spotlight" id="recap-reality-check"></div>
+        <div class="recap-spotlight positive" id="recap-playoff-watch"></div>
+      </div>
+      <div class="move-blocks" id="move-blocks"></div>
+    </section>
+        </div>
+        <div class="blk-status">
+    <section id="bracket-section">
+      <div class="section-head">
+        <h2>Bracket de Playoffs</h2>
+        <span class="note">Top 2 de cada liga = bye · los siguientes 8 mejores de la tabla general completan playoffs</span>
+      </div>
+      <div class="bracket-panel">
+        <div class="bracket-scroll">
+          <div class="bracket" id="bracket"></div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="section-head">
+        <h2>🍠 El Camote Bowl</h2>
+        <span class="note">Los que no llegaron a playoffs se lo juegan entre ellos — nadie se salva de la vergüenza familiar</span>
+      </div>
+      <div class="bracket-panel camote-theme">
+        <div class="bracket-scroll">
+          <div class="bracket" id="camote-bracket"></div>
+        </div>
+      </div>
+    </section>
+        </div>
+        <div class="blk-table">
+    <section id="rankings-section">
+      <div class="section-head">
+        <h2>Clasificacion Combinada</h2>
+        <span class="note">Todos los equipos de ambas ligas, en una sola tabla</span>
+      </div>
+      <div class="ledger">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Equipo</th>
+              <th>Liga</th>
+              <th class="num">Record</th>
+              <th class="num">Racha</th>
+              <th class="num">Pts</th>
+              <th class="num" title="Probabilidad de entrar a playoffs antes de la última semana">Prob.</th>
+            </tr>
+          </thead>
+          <tbody id="rankings-body"></tbody>
+        </table>
+        <div class="ledger-legend" id="rankings-legend"></div>
+      </div>
+    </section>
+        </div>
+      </div>
+      <div class="split-right">
+        <div class="blk-games">
+          <div class="section-head">
+            <h2>Partidos</h2>
+            <span class="note games-legend"><span class="lg-dot lg-cardinal"></span>Abuela Cuca <span class="lg-dot lg-slate"></span>Abuelo Jesus</span>
+          </div>
+          <div class="games-group">
+            <h3 class="group-title" id="results-title">Resultados</h3>
+            <div id="results-games"></div>
+          </div>
+          <div class="games-group">
+            <h3 class="group-title" id="upcoming-title">Próximos Juegos</h3>
+            <div id="upcoming-games"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB 2: ABUELA CUCA -->
+  <div class="tab-panel" id="tab-cuca">
+    <div class="headline-row" id="cuca-headline"></div>
+    <section>
+      <div class="section-head">
+        <h2 id="cuca-title">Abuela Cuca</h2>
+        <span class="note">Playoff picture — top 6 clasifican, top 2 con bye en Ronda 1 (formato propio de esta liga)</span>
+      </div>
+      <div class="league-panel" id="cuca-panel"></div>
+    </section>
+    <section>
+      <div class="section-head">
+        <h2>Bracket de Playoffs — Abuela Cuca</h2>
+        <span class="note">Independiente del bracket general — solo equipos de esta liga</span>
+      </div>
+      <div class="bracket-panel">
+        <div class="bracket-scroll">
+          <div class="bracket" id="cuca-bracket"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TAB 3: ABUELO JESUS -->
+  <div class="tab-panel" id="tab-jesus">
+    <div class="headline-row" id="jesus-headline"></div>
+    <section>
+      <div class="section-head">
+        <h2 id="jesus-title">Abuelo Jesus</h2>
+        <span class="note">Playoff picture — top 6 clasifican, top 2 con bye en Ronda 1 (formato propio de esta liga)</span>
+      </div>
+      <div class="league-panel" id="jesus-panel"></div>
+    </section>
+    <section>
+      <div class="section-head">
+        <h2>Bracket de Playoffs — Abuelo Jesus</h2>
+        <span class="note">Independiente del bracket general — solo equipos de esta liga</span>
+      </div>
+      <div class="bracket-panel">
+        <div class="bracket-scroll">
+          <div class="bracket" id="jesus-bracket"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TAB 4: CAMOTE BOWL -->
+
+</div>
+
+
+<script>
+/* =========================================================
+   EDITA ESTOS DATOS con tus ligas reales.
+   Cada equipo necesita: name, wins, losses, pointsFor.
+   ========================================================= */
+
+const leagueA = {
+  name: "Abuela Cuca",
+  color: "cardinal",     // coincide con --cardinal en CSS
+  teams: [
+    { name: "SteelersLaguna", wins: 5, losses: 6, pointsFor: 1188.80, weekPoints: 99.56 },
+    { name: "Dr Patrick", wins: 8, losses: 3, pointsFor: 1333.16, weekPoints: 117.90 },
+    { name: "Galacticos", wins: 9, losses: 2, pointsFor: 1249.14, weekPoints: 111.06 },
+    { name: "Los Rifles 2.0", wins: 6, losses: 5, pointsFor: 1188.68, weekPoints: 111.36 },
+    { name: "Color Esperanza", wins: 6, losses: 5, pointsFor: 1153.78, weekPoints: 106.44 },
+    { name: "Capitan JC", wins: 4, losses: 7, pointsFor: 1208.88, weekPoints: 100.76 },
+    { name: "Beard of Steel", wins: 9, losses: 2, pointsFor: 1100.16, weekPoints: 118.00 },
+    { name: "Chuy", wins: 2, losses: 9, pointsFor: 1001.44, weekPoints: 88.66 },
+    { name: "Real Bañil", wins: 6, losses: 5, pointsFor: 1152.02, weekPoints: 80.10 },
+    { name: "CacaLoapanPushers", wins: 6, losses: 5, pointsFor: 1140.46, weekPoints: 75.90 },
+    { name: "Pending Wiki", wins: 5, losses: 6, pointsFor: 1021.10, weekPoints: 95.34 },
+  ]
+};
+
+const leagueB = {
+  name: "Abuelo Jesus",
+  color: "slate",        // coincide con --slate en CSS
+  teams: [
+    { name: "TEPOS", wins: 6, losses: 5, pointsFor: 1215.88, weekPoints: 119.30 },
+    { name: "Steel Armonico", wins: 6, losses: 5, pointsFor: 1086.86, weekPoints: 106.00 },
+    { name: "RODCKERS", wins: 5, losses: 6, pointsFor: 1182.10, weekPoints: 85.60 },
+    { name: "Los Marrones", wins: 8, losses: 3, pointsFor: 1264.38, weekPoints: 52.36 },
+    { name: "DanielAD85", wins: 7, losses: 4, pointsFor: 1195.50, weekPoints: 109.38 },
+    { name: "Peor Pesadilla", wins: 7, losses: 4, pointsFor: 1113.36, weekPoints: 94.66 },
+    { name: "THE BOYZ", wins: 6, losses: 5, pointsFor: 1128.76, weekPoints: 95.14 },
+    { name: "Martha", wins: 3, losses: 8, pointsFor: 1044.02, weekPoints: 74.06 },
+    { name: "pablogutig", wins: 7, losses: 4, pointsFor: 1301.28, weekPoints: 122.50 },
+    { name: "Luisramon98", wins: 6, losses: 5, pointsFor: 1085.32, weekPoints: 114.76 },
+    { name: "SanPancho85", wins: 5, losses: 6, pointsFor: 1248.30, weekPoints: 121.44 },
+  ]
+};
+
+const weekLabel = "Semana 11 · Resultados reales (ambas ligas)";
+const currentWeek = 11; // las secciones manuales del recap solo se muestran si coinciden con esta semana
+
+/* Top 3 jugadores individuales de la semana (dato público de la app).
+   EDITA esto con los nombres/puntos reales — name, team, points. */
+
+
+/* =========================================================
+   Logica de renderizado — no hace falta tocar esto.
+   ========================================================= */
+
+document.getElementById('week-tag').textContent = weekLabel;
+
+function winPct(t){
+  const games = t.wins + t.losses;
+  return games === 0 ? 0 : t.wins / games; // team on a bye this week: no game played yet
+}
+function sortTeams(teams){
+  return [...teams].sort((a,b) => winPct(b)-winPct(a) || b.pointsFor - a.pointsFor);
+}
+
+// Playoff format:
+//  - Bye: the top 2 teams of EACH conference/league, guaranteed, regardless of
+//    how they compare to the other league.
+//  - Wild Card: once those 4 are set aside, the 8 BEST remaining teams by the
+//    general table (any mix of leagues) take the wildcard spots — seeded and
+//    labeled with their real position in the general table, not renumbered.
+//  - Camote Bowl: everyone else (10 teams), same bye-per-conference idea
+//    applied within that smaller group.
+const TOTAL_PLAYOFF_SPOTS = 12;
+const teamKey = t => `${t.tag}|${t.name}`;
+
+// Each conference also runs its OWN independent playoff — separate bracket,
+// separate cutoff line, nothing to do with the general/combined one above.
+const CONF_PLAYOFF_SPOTS = 6;
+const CONF_BYE_SPOTS = 2;
+function confPlayoffStatus(localIndex){
+  if (localIndex < CONF_BYE_SPOTS) return { key: 'bye', label: 'Bye · Ronda 1' };
+  if (localIndex < CONF_PLAYOFF_SPOTS) return { key: 'playoff', label: 'Playoffs' };
+  return { key: 'out', label: '🍠 Camote Bowl' };
+}
+
+// Walks a pool that's already sorted by the general table and pulls out the
+// first `byesPerLeague` teams encountered per league — since the general sort
+// never reorders two teams from the same league relative to each other, this
+// is exactly that league's own top teams within the pool.
+function splitByeAndField(pool, byesPerLeague){
+  const byes = [];
+  const counts = {};
+  const byeKeys = new Set();
+  pool.forEach(t => {
+    counts[t.tag] = counts[t.tag] || 0;
+    if (counts[t.tag] < byesPerLeague){
+      counts[t.tag]++;
+      byes.push(t);
+      byeKeys.add(teamKey(t));
+    }
+  });
+  const field = pool.filter(t => !byeKeys.has(teamKey(t)));
+  return { byes, field };
+}
+
+// ---- Build the general/combined table first — everything else reads from it ----
+const combined = [
+  ...leagueA.teams.map(t => ({...t, league: leagueA.name, tag: leagueA.color})),
+  ...leagueB.teams.map(t => ({...t, league: leagueB.name, tag: leagueB.color})),
+];
+const rankedCombined = sortTeams(combined).map((t, i) => ({...t, overallRank: i + 1}));
+
+const mainSplit = splitByeAndField(rankedCombined, 2);        // 4 conference byes + 18 remaining
+const wildcardTeams = mainSplit.field.slice(0, 8);             // best 8 of the rest, general order
+const campoteCandidates = mainSplit.field.slice(8);            // the 10 that miss playoffs
+
+mainSplit.byes.forEach(t => { t.statusKey = 'bye'; t.statusLabel = 'Bye · Ronda 1'; });
+wildcardTeams.forEach(t => { t.statusKey = 'playoff'; t.statusLabel = 'Playoffs'; });
+campoteCandidates.forEach(t => { t.statusKey = 'out'; t.statusLabel = '🍠 Camote Bowl'; });
+
+// (statusByTeam removed — each conference table now uses its own local playoff status)
+
+function renderLeagueTab(league, panelId, headlineId, titleId, bracketId, champLabel){
+  const sorted = sortTeams(league.teams); // this conference's own independent standings
+  document.getElementById(titleId).textContent = league.name;
+
+  const panel = document.getElementById(panelId);
+  panel.style.setProperty('--panel-color', `var(--${league.color})`);
+
+  const rows = sorted.map((t,i) => {
+    const status = confPlayoffStatus(i);
+    const cutoff = (i === CONF_PLAYOFF_SPOTS)
+      ? `<tr class="cutoff-row"><td colspan="5">— línea de playoff (de esta conferencia) —</td></tr>` : '';
+    return `${cutoff}
+      <tr>
+        <td class="num rank-num">${i+1}</td>
+        <td>${t.name}</td>
+        <td class="num">${t.bye ? '1-0' : `${t.wins}-${t.losses}`}</td>
+        <td class="num">${t.pointsFor.toFixed(1)}</td>
+        <td><span class="status-badge st-${status.key}">${status.label}</span></td>
+      </tr>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <h3><span class="dot"></span>${league.name} — Playoff Picture</h3>
+    <table>
+      <thead><tr><th></th><th>Equipo</th><th class="num">G-P</th><th class="num">PF</th><th>Estado</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+
+  const leader = sorted[0];
+  const topScorer = [...league.teams].sort((a,b)=>b.pointsFor-a.pointsFor)[0];
+  const cutoffLeader = sorted[CONF_PLAYOFF_SPOTS - 1]; // last team IN, this conference
+  const cutoffChaser = sorted[CONF_PLAYOFF_SPOTS];     // first team OUT, this conference
+  const cutoffGap = cutoffLeader.pointsFor - cutoffChaser.pointsFor;
+  const headline = document.getElementById(headlineId);
+  headline.innerHTML = `
+    <div class="stat-card" style="--panel-color:var(--${league.color})">
+      <div class="label">Primer lugar (en la liga)</div>
+      <div class="value">${leader.name}</div>
+    </div>
+    <div class="stat-card" style="--panel-color:var(--${league.color})">
+      <div class="label">Mas puntos anotados</div>
+      <div class="value">${topScorer.name}</div>
+    </div>
+    <div class="stat-card" style="--panel-color:var(--${league.color})">
+      <div class="label">Distancia al corte (6° vs 7°)</div>
+      <div class="value">${cutoffGap >= 0 ? '+' : ''}${cutoffGap.toFixed(1)} pts</div>
+    </div>
+  `;
+
+  buildConferenceBracket(league, sorted, bracketId, champLabel);
+  return sorted; // handed back so the recap section can still order by this league's own record
+}
+
+// One conference's own 6-team playoff bracket: top 2 (local rank) get a bye,
+// ranks 3-6 play Ronda 1. Fully independent from the general/combined bracket.
+function buildConferenceBracket(league, sorted, containerId, champLabel){
+  const byes = sorted.slice(0, CONF_BYE_SPOTS);                    // rank1, rank2
+  const wildcard = sorted.slice(CONF_BYE_SPOTS, CONF_PLAYOFF_SPOTS); // rank3..rank6
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  function slot(team, rankNum, label){
+    if(!team) return `<div class="slot tbd"><span class="seed"></span><span class="name">${label || 'Por definir'}</span></div>`;
+    return `<div class="slot ${league.color}-seed">
+        <span class="seed">${rankNum}</span>
+        <span class="name">${team.name}</span>
+      </div>`;
+  }
+
+  const r1 = document.createElement('div');
+  r1.className = 'round';
+  r1.innerHTML = `<div class="round-label">Ronda 1</div>` +
+    `<div class="matchup">
+      <div class="connector"></div>
+      ${slot(wildcard[0], 3)}
+      <div class="vs-divider">vs</div>
+      ${slot(wildcard[3], 6)}
+    </div>` +
+    `<div class="matchup">
+      <div class="connector"></div>
+      ${slot(wildcard[1], 4)}
+      <div class="vs-divider">vs</div>
+      ${slot(wildcard[2], 5)}
+    </div>`;
+  el.appendChild(r1);
+
+  const sf = document.createElement('div');
+  sf.className = 'round';
+  sf.innerHTML = `<div class="round-label">Semifinal</div>` +
+    `<div class="matchup">
+      <div class="connector"></div>
+      ${slot(byes[0], 1)}
+      <div class="vs-divider">vs</div>
+      ${slot(null, null, 'Ganador Ronda 1 · Partido 2')}
+    </div>` +
+    `<div class="matchup">
+      <div class="connector"></div>
+      ${slot(byes[1], 2)}
+      <div class="vs-divider">vs</div>
+      ${slot(null, null, 'Ganador Ronda 1 · Partido 1')}
+    </div>`;
+  el.appendChild(sf);
+
+  const final = document.createElement('div');
+  final.className = 'round';
+  final.innerHTML = `<div class="round-label">Final</div>
+    <div class="matchup" style="margin-top:auto;margin-bottom:auto;">
+      <div class="connector"></div>
+      ${slot(null, null, 'Ganador Semifinal 1')}
+      <div class="vs-divider">vs</div>
+      ${slot(null, null, 'Ganador Semifinal 2')}
+    </div>`;
+  el.appendChild(final);
+
+  const champ = document.createElement('div');
+  champ.className = 'champion-block';
+  champ.innerHTML = `
+    <div class="trophy-icon">🏆</div>
+    <div class="trophy-label">${champLabel}</div>
+    <div class="champion-name">Por definir</div>
+  `;
+  el.appendChild(champ);
+}
+
+const sortedA = renderLeagueTab(leagueA, 'cuca-panel', 'cuca-headline', 'cuca-title', 'cuca-bracket', 'Campeón Abuela Cuca');
+const sortedB = renderLeagueTab(leagueB, 'jesus-panel', 'jesus-headline', 'jesus-title', 'jesus-bracket', 'Campeón Abuelo Jesus');
+
+// ---- Combined power rankings (Resumen Semanal tab) — reuses rankedCombined from above ----
+// Racha actual de cada equipo (W = victorias seguidas, L = derrotas seguidas).
+// EDITA esto cada semana, usando el nombre exacto del equipo.
+const streaks = {
+  "Galacticos": "2W", "Dr Patrick": "5W", "Los Marrones": "2L", "Capitan JC": "6L",
+  "DanielAD85": "2L", "SteelersLaguna": "3L", "Peor Pesadilla": "1L", "TEPOS": "2W",
+  "Los Rifles 2.0": "1W", "THE BOYZ": "1W", "pablogutig": "1W", "Color Esperanza": "1W",
+  "CacaLoapanPushers": "2L", "Martha": "1L", "RODCKERS": "1L", "Steel Armonico": "2W",
+  "Beard of Steel": "8W", "Luisramon98": "1W", "SanPancho85": "4W", "Chuy": "1L",
+  "Real Bañil": "5W", "Pending Wiki": "1L",
+};
+
+// Foto de la semana anterior: [victorias, derrotas, puntos acumulados].
+// Sirve para calcular cuántos lugares subió o bajó cada equipo en la tabla general.
+// Cada semana, antes de actualizar los datos, esto se reemplaza con los valores de la semana que acaba de pasar.
+const prevSnapshot = {
+  week: 10,
+  teams: {
+    "SteelersLaguna": [5,5,1089.24],
+    "Dr Patrick": [7,3,1215.26],
+    "Galacticos": [8,2,1138.08],
+    "Los Rifles 2.0": [5,5,1077.32],
+    "Color Esperanza": [5,5,1047.34],
+    "Capitan JC": [4,6,1108.12],
+    "Beard of Steel": [8,2,982.16],
+    "Chuy": [2,8,912.78],
+    "Real Bañil": [5,5,1071.92],
+    "CacaLoapanPushers": [6,4,1064.56],
+    "Pending Wiki": [5,5,925.76],
+    "TEPOS": [5,5,1096.58],
+    "Steel Armonico": [5,5,980.86],
+    "RODCKERS": [5,5,1096.50],
+    "Los Marrones": [8,2,1212.02],
+    "DanielAD85": [7,3,1086.12],
+    "Peor Pesadilla": [7,3,1018.70],
+    "THE BOYZ": [5,5,1033.62],
+    "Martha": [3,7,969.96],
+    "pablogutig": [6,4,1178.78],
+    "Luisramon98": [5,5,970.56],
+    "SanPancho85": [4,6,1126.86],
+  },
+};
+const prevRankByName = {};
+sortTeams(Object.entries(prevSnapshot.teams).map(([name, [wins, losses, pointsFor]]) => ({ name, wins, losses, pointsFor })))
+  .forEach((t, i) => { prevRankByName[t.name] = i + 1; });
+
+function movementHTML(t){
+  const prev = prevRankByName[t.name];
+  if (!prev) return '';
+  const diff = prev - t.overallRank; // positivo = subió lugares
+  if (diff > 0) return `<div class="mv up">▲${diff}</div>`;
+  if (diff < 0) return `<div class="mv down">▼${Math.abs(diff)}</div>`;
+  return `<div class="mv same">—</div>`;
+}
+
+const preProb = {"SteelersLaguna": [43, 0], "Dr Patrick": [100, 65], "Galacticos": [100, 86], "Los Rifles 2.0": [44, 0], "Color Esperanza": [44, 0], "Capitan JC": [0, 0], "Beard of Steel": [100, 50], "Chuy": [0, 0], "Real Bañil": [89, 0], "CacaLoapanPushers": [90, 0], "Pending Wiki": [2, 0], "TEPOS": [65, 0], "Steel Armonico": [8, 0], "RODCKERS": [64, 0], "Los Marrones": [100, 100], "DanielAD85": [100, 64], "Peor Pesadilla": [100, 11], "THE BOYZ": [46, 0], "Martha": [0, 0], "pablogutig": [100, 25], "Luisramon98": [2, 0], "SanPancho85": [0, 0]};
+// % de entrar a playoffs (y de bye) calculado antes de la semana 11 (simulación)
+const rankingsBody = document.getElementById('rankings-body');
+rankingsBody.innerHTML = rankedCombined.map((t) => {
+  const s = streaks[t.name] || '—';
+  const sCls = s.endsWith('W') ? 'streak-w' : s.endsWith('L') ? 'streak-l' : '';
+  return `
+  <tr>
+    <td class="rank-big row-${t.statusKey}"><div>${t.overallRank}</div>${movementHTML(t)}</td>
+    <td>${t.name}</td>
+    <td><span class="pill ${t.tag}">${t.tag === 'cardinal' ? leagueA.name : leagueB.name}</span></td>
+    <td class="num">${t.bye ? 'BYE' : `${t.wins}-${t.losses}`}</td>
+    <td class="num ${sCls}">${s}</td>
+    <td class="num">${t.pointsFor.toFixed(1)}</td>
+    <td class="num prob-c">${preProb[t.name] ? preProb[t.name][0] + '%' : '—'}</td>
+  </tr>`;
+}).join('');
+document.getElementById('rankings-legend').innerHTML =
+  `<span class="swatch"></span> = equipo en playoffs (bye o clasificado) según la tabla general · ▲▼ = lugares que subió o bajó vs. semana ${prevSnapshot.week} · Prob. = % de probabilidad de entrar a playoffs antes de la última semana (simulación)`;
+
+// ---- Bloques: más lugares perdidos (izquierda) y más lugares ganados (derecha) ----
+// Se calculan solos a partir del movimiento en la tabla general; si hay empate, salen todos.
+const moves = rankedCombined
+  .filter(t => prevRankByName[t.name])
+  .map(t => ({ t, diff: prevRankByName[t.name] - t.overallRank }));
+const maxUp = Math.max(0, ...moves.map(m => m.diff));
+const maxDown = Math.max(0, ...moves.map(m => -m.diff));
+
+function moveCardHTML(kind, amount, label){
+  const winners = amount > 0 ? moves.filter(m => (kind === 'up' ? m.diff === amount : m.diff === -amount)) : [];
+  const body = amount > 0
+    ? `<div class="move-num"><span class="arrow">${kind === 'up' ? '▲' : '▼'}</span>${amount}</div>
+       <div class="move-teams"><strong>${winners.map(m => `<span class="nm">${m.t.name}</span>`).join(' / ')}</strong></div>`
+    : `<div class="move-empty">Nadie ${kind === 'up' ? 'subió' : 'bajó'} esta semana.</div>`;
+  return `<div class="move-card ${kind}"><div class="move-title">${label}</div>${body}</div>`;
+}
+document.getElementById('move-blocks').innerHTML =
+  moveCardHTML('down', maxDown, '📉 Más lugares perdidos') +
+  moveCardHTML('up', maxUp, '📈 Más lugares ganados');
+
+// ---- Resultados de la semana pasada + juegos de esta semana ----
+// Solo se guardan los CRUCES [equipoA, equipoB]. Los puntos de los resultados salen solos
+// del puntaje semanal (weekPoints) de cada equipo. "BYE" = el equipo ficticio de la liga.
+// Cada bloque lleva su semana; si no coincide, se muestra "por publicar" en vez de datos viejos.
+const resultsMatchups = {
+  week: 11,
+  cuca: [
+    ["BYE", "Real Bañil"], ["Color Esperanza", "Pending Wiki"],
+    ["Los Rifles 2.0", "Capitan JC"], ["Beard of Steel", "CacaLoapanPushers"],
+    ["Galacticos", "SteelersLaguna"], ["Dr Patrick", "Chuy"],
+  ],
+  jesus: [
+    ["Peor Pesadilla", "pablogutig"], ["THE BOYZ", "BYE"],
+    ["Martha", "TEPOS"], ["Los Marrones", "SanPancho85"],
+    ["Luisramon98", "DanielAD85"], ["Steel Armonico", "RODCKERS"],
+  ],
+};
+const upcomingMatchups = {
+  week: 12,          // EDITA: cruces de esta semana
+  cuca: [
+    
+  ],
+  jesus: [
+    
+  ],
+};
+
+const teamByName = Object.fromEntries(combined.map(t => [t.name, t]));
+
+function gameRowsHTML(a, b, mode){
+  const ta = teamByName[a], tb = teamByName[b];
+  if (mode === 'results') {
+    const sa = ta ? ta.weekPoints : null, sb = tb ? tb.weekPoints : null;
+    const aWins = (b === 'BYE') || (a !== 'BYE' && sa !== null && sb !== null && sa >= sb);
+    const row = (name, score, won) => `
+      <div class="game-row ${name === 'BYE' ? 'bye' : won ? 'win' : 'lose'}">
+        <span class="gname">${name}</span>
+        <span class="gscore">${score == null ? '—' : score.toFixed(2)}</span>
+      </div>`;
+    return `<div class="game">${row(a, sa, aWins)}${row(b, sb, !aWins)}</div>`;
+  }
+  const row = (name, t) => `
+    <div class="game-row ${name === 'BYE' ? 'bye' : ''}">
+      <span class="gname">${name}${t ? `<small>${t.wins}-${t.losses}</small>` : ''}</span>
+    </div>`;
+  return `<div class="game">${row(a, ta)}${row(b, tb)}</div>`;
+}
+
+function renderGamesSection(containerId, data, mode, expectedWeek, pendingMsg){
+  const ready = data.week === expectedWeek;
+  const el = document.getElementById(containerId);
+  const hasGames = ready && (data.cuca.length || data.jesus.length);
+  if (!hasGames) { el.innerHTML = `<div class="games-pending">${pendingMsg}</div>`; return; }
+
+  const cardsFor = (games, league) => games
+    .map(([a, b]) => gameRowsHTML(a, b, mode).replace('<div class="game">', `<div class="game lg-${league.color}">`))
+    .join('');
+
+  if (mode === 'upcoming') {
+    // dos columnas, una por liga, para que los cruces no queden apretados
+    el.innerHTML = `<div class="games-2col">` + [
+      { games: data.cuca, league: leagueA },
+      { games: data.jesus, league: leagueB },
+    ].map(({ games, league }) => `
+      <div class="games-col">
+        <div class="games-col-title"><span class="lg-dot lg-${league.color}"></span>${league.name}</div>
+        ${cardsFor(games, league)}
+      </div>`).join('') + `</div>`;
+  } else {
+    el.innerHTML = cardsFor(data.cuca, leagueA) + cardsFor(data.jesus, leagueB);
+  }
+}
+
+document.getElementById('results-title').textContent = `Resultados · Semana ${currentWeek}`;
+document.getElementById('upcoming-title').textContent = `Próximos Juegos · Semana ${currentWeek + 1}`;
+renderGamesSection('results-games', resultsMatchups, 'results', currentWeek, 'Resultados por publicar.');
+renderGamesSection('upcoming-games', upcomingMatchups, 'upcoming', currentWeek + 1, 'Los cruces de esta semana se publican en cuanto estén listos.');
+
+// ---- Golpe de Realidad: highlight manual, negativo (edítalo cada semana) ----
+const realityCheck = {
+  week: 10, // si no coincide con currentWeek, la tarjeta se oculta
+  title: "Golpe de Realidad",
+  emoji: "💀",
+  text: "Los Marrones perdieron su racha de <strong>7W</strong>.",
+};
+document.getElementById('recap-reality-check').innerHTML = `
+  <div class="spotlight-emoji">${realityCheck.emoji}</div>
+  <div class="spotlight-body">
+    <div class="spotlight-title">${realityCheck.title}</div>
+    <div class="spotlight-text">${realityCheck.text}</div>
+  </div>
+`;
+if (realityCheck.week !== currentWeek) document.getElementById('recap-reality-check').style.display = 'none';
+
+// ---- Racha Positiva: equipos a destacar en zona de playoffs (tabla general) ----
+// Esto NO se calcula solo — edita esta lista cada semana con los equipos que
+// quieras resaltar (usa el nombre exacto como está en leagueA/leagueB).
+const playoffWatchWeek = 3; // si no coincide con currentWeek, la tarjeta se oculta
+const playoffWatch = ["Dr Patrick", "SteelersLaguna", "Galacticos"];
+document.getElementById('recap-playoff-watch').innerHTML = `
+  <div class="spotlight-emoji">🚀</div>
+  <div class="spotlight-body">
+    <div class="spotlight-title">Racha Positiva — Zona de Playoffs</div>
+    <div class="spotlight-text"><strong>${playoffWatch.join(', ')}</strong> invictos y no parece que nadie los pare.</div>
+  </div>
+`;
+if (playoffWatchWeek !== currentWeek) document.getElementById('recap-playoff-watch').style.display = 'none';
+
+// ---- De aplaudirse: menciones positivas manuales (una tarjeta por elemento) ----
+// Agrega más objetos a esta lista; solo se muestran los de la semana actual.
+const applause = [
+  { week: 4, emoji: "👏", title: "DE APLAUDIRSE",
+    html: "Steelers Laguna completa su <strong>IRONMAN #9</strong>" },
+  { week: 10, emoji: "🤩", title: "IMPRESIONANTE",
+    html: "Beard of Steel con <strong>7W</strong>" },
+  { week: 7, emoji: "🤩", title: "IMPRESIONANTE",
+    html: "Los Marrones con <strong>5W</strong>" },
+  { week: 5, emoji: "🤩", title: "IMPRESIONANTE",
+    html: "Galacticos invicto e intratable" },
+  { week: 6, emoji: "⚔️", title: "LO QUE SE VIENE", upcoming: true,
+    html: "<strong>Rifles 2.0 vs Galacticos</strong>, duelo de hermanos. ¿Serán los Rifles capaces de darle la primera derrota a los Galacticos, o se hundirán en su realidad y se alejarán de playoffs?" },
+  { week: 5, emoji: "😭", title: "DE LAMENTARSE", negative: true,
+    html: "San Pancho y Real Bañil parece que nomás no" },
+];
+document.getElementById('recap-applause').innerHTML = applause
+  .filter(a => a.week === currentWeek)
+  .map(a => `
+    <div class="recap-spotlight${a.negative ? '' : a.upcoming ? ' upcoming' : ' positive'}">
+      <div class="spotlight-emoji">${a.emoji}</div>
+      <div class="spotlight-body">
+        <div class="spotlight-title">${a.title}</div>
+        <div class="spotlight-text">${a.html}</div>
+      </div>
+    </div>`).join('');
+
+// ---- Bracket: 12-team combined playoff ----
+// Byes: top 2 of each league (mainSplit.byes). Wild Card: the 8 best remaining
+// teams by the general table (wildcardTeams), already in general order.
+const byePool = [...mainSplit.byes].sort((a,b) => a.overallRank - b.overallRank); // strongest bye first
+const playInPool = wildcardTeams; // already sorted best-to-worst by the general table
+
+// Standard 8-team seeding pattern: best vs worst, then work inward.
+const r1Pairs = [
+  { a: playInPool[0], b: playInPool[7] },
+  { a: playInPool[3], b: playInPool[4] },
+  { a: playInPool[2], b: playInPool[5] },
+  { a: playInPool[1], b: playInPool[6] },
+];
+
+function slotHTML(team, label){
+  if(!team) return `<div class="slot tbd"><span class="seed"></span><span class="name">${label || 'Por definir'}</span></div>`;
+  return `<div class="slot ${team.tag}-seed">
+      <span class="seed">${team.overallRank}</span>
+      <span class="name">${team.name}</span>
+    </div>`;
+}
+
+const bracketEl = document.getElementById('bracket');
+
+// Ronda 1 (Wild Card) — the 8 non-bye playoff teams, seeded together
+const r1Round = document.createElement('div');
+r1Round.className = 'round';
+r1Round.innerHTML = `<div class="round-label">Ronda 1 · Wild Card</div>` +
+  r1Pairs.map(p => `
+    <div class="matchup">
+      <div class="connector"></div>
+      ${slotHTML(p.a)}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(p.b)}
+    </div>
+  `).join('');
+bracketEl.appendChild(r1Round);
+
+// Cuartos de Final — the 4 byes, best bye protected against the toughest
+// remaining wild-card winner, weakest bye facing the softest matchup's winner.
+const qfPairings = [
+  { bye: byePool[0], vsMatch: 2 }, // best bye vs winner of the 4-5 seed match (softest pairing)
+  { bye: byePool[1], vsMatch: 3 }, // vs winner of 3-6 seed match
+  { bye: byePool[2], vsMatch: 4 }, // vs winner of 2-7 seed match
+  { bye: byePool[3], vsMatch: 1 }, // weakest bye vs winner of the toughest pairing (1-8 seed match)
+];
+const qfRound = document.createElement('div');
+qfRound.className = 'round';
+qfRound.innerHTML = `<div class="round-label">Cuartos de Final</div>` +
+  qfPairings.map((q) => `
+    <div class="matchup">
+      <div class="connector"></div>
+      ${slotHTML(q.bye)}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(null, `Ganador Ronda 1 · Partido ${q.vsMatch}`)}
+    </div>
+  `).join('');
+bracketEl.appendChild(qfRound);
+
+// Ronda 3 (Semifinal): 4 Ronda 2 winners
+const sfRound = document.createElement('div');
+sfRound.className = 'round';
+sfRound.innerHTML = `<div class="round-label">Semifinal</div>` +
+  [0,1].map(idx => `
+    <div class="matchup">
+      <div class="connector"></div>
+      ${slotHTML(null, `Ganador Cuartos · Partido ${idx*2+1}`)}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(null, `Ganador Cuartos · Partido ${idx*2+2}`)}
+    </div>
+  `).join('');
+bracketEl.appendChild(sfRound);
+
+// Final
+const finalRound = document.createElement('div');
+finalRound.className = 'round';
+finalRound.innerHTML = `<div class="round-label">Final</div>
+    <div class="matchup" style="margin-top:auto;margin-bottom:auto;">
+      <div class="connector"></div>
+      ${slotHTML(null, 'Ganador Semifinal 1')}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(null, 'Ganador Semifinal 2')}
+    </div>`;
+bracketEl.appendChild(finalRound);
+
+const champBlock = document.createElement('div');
+champBlock.className = 'champion-block';
+champBlock.innerHTML = `
+  <div class="trophy-icon">🏆</div>
+  <div class="trophy-label">Campeon</div>
+  <div class="champion-name">Por definir</div>
+`;
+bracketEl.appendChild(champBlock);
+
+// ---- Camote Bowl: LOSER advances (the point is finding the true worst team). ----
+// The 4 best of the missed-playoff group play each other first in a
+// "Ronda de Salvación": WINNER is safe and exits the Camote Bowl entirely,
+// LOSER drops into the main 8-team draw with the bottom 6. From there,
+// losing keeps you alive — whoever loses the FINAL is the ultimate Camote.
+const camoteAll = campoteCandidates; // 10 teams, general order (best to worst)
+const camoteTop4 = camoteAll.slice(0, 4);
+const camoteRest6 = camoteAll.slice(4);
+
+const camoteBracketEl = document.getElementById('camote-bracket');
+
+// Ronda de Salvación
+const salvacionPairs = [
+  { a: camoteTop4[0], b: camoteTop4[3] },
+  { a: camoteTop4[1], b: camoteTop4[2] },
+];
+const salvacionRound = document.createElement('div');
+salvacionRound.className = 'round';
+salvacionRound.innerHTML = `<div class="round-label">Ronda de Salvación</div>` +
+  salvacionPairs.map(p => `
+    <div class="matchup">
+      <div class="connector"></div>
+      ${slotHTML(p.a)}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(p.b)}
+    </div>
+  `).join('');
+camoteBracketEl.appendChild(salvacionRound);
+
+// Ronda 1 (cuadro completo): the 2 Salvación losers join the bottom 6.
+const cr1Pairs = [
+  { aLabel: 'Perdedor Salvación A', b: camoteRest6[5] },
+  { a: camoteRest6[2], b: camoteRest6[3] },
+  { aLabel: 'Perdedor Salvación B', b: camoteRest6[4] },
+  { a: camoteRest6[0], b: camoteRest6[1] },
+];
+const cr1Round = document.createElement('div');
+cr1Round.className = 'round';
+cr1Round.innerHTML = `<div class="round-label">Ronda 1</div>` +
+  cr1Pairs.map(p => `
+    <div class="matchup">
+      <div class="connector"></div>
+      ${p.a ? slotHTML(p.a) : slotHTML(null, p.aLabel)}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(p.b)}
+    </div>
+  `).join('');
+camoteBracketEl.appendChild(cr1Round);
+
+// Semifinal: LOSERS of Ronda 1 advance (deeper into the Camote Bowl = worse)
+const camoteSfRound = document.createElement('div');
+camoteSfRound.className = 'round';
+camoteSfRound.innerHTML = `<div class="round-label">Semifinal</div>` +
+  [0,1].map(idx => `
+    <div class="matchup">
+      <div class="connector"></div>
+      ${slotHTML(null, `Perdedor Ronda 1 · Partido ${idx*2+1}`)}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(null, `Perdedor Ronda 1 · Partido ${idx*2+2}`)}
+    </div>
+  `).join('');
+camoteBracketEl.appendChild(camoteSfRound);
+
+// Final: whoever LOSES this game is, officially, the worst team of the season.
+const camoteFinalRound = document.createElement('div');
+camoteFinalRound.className = 'round';
+camoteFinalRound.innerHTML = `<div class="round-label">Final</div>
+    <div class="matchup" style="margin-top:auto;margin-bottom:auto;">
+      <div class="connector"></div>
+      ${slotHTML(null, 'Perdedor Semifinal 1')}
+      <div class="vs-divider">vs</div>
+      ${slotHTML(null, 'Perdedor Semifinal 2')}
+    </div>`;
+camoteBracketEl.appendChild(camoteFinalRound);
+
+const camoteChampBlock = document.createElement('div');
+camoteChampBlock.className = 'champion-block';
+camoteChampBlock.innerHTML = `
+  <div class="trophy-icon">🍠</div>
+  <div class="trophy-label">El Camote Mayor</div>
+  <div class="champion-name">Quien PIERDA la final</div>
+`;
+camoteBracketEl.appendChild(camoteChampBlock);
+
+// ---- Camino a Playoffs: PlayOffs / In The Hunt / Eliminated ----
+// Se calcula solo. Considera TODOS los resultados posibles de los juegos que faltan (próxima semana) y
+// aplica la misma regla del bracket general: 2 mejores de cada liga (bye) + 8 mejores del resto.
+// Desempate por puntos acumulados; como los puntos de los juegos que faltan son desconocidos, se usa
+// el rango real de la temporada (50–185 pts) de forma conservadora.
+const SEASON_WEEKS = 11; // semanas de temporada regular
+(function(){
+  const section = document.getElementById('status-section');
+  if (!section) return;
+  if (currentWeek < SEASON_WEEKS - 1) { section.style.display = 'none'; return; }
+  const remaining = (currentWeek < SEASON_WEEKS && upcomingMatchups.week === currentWeek + 1)
+    ? [...upcomingMatchups.cuca, ...upcomingMatchups.jesus] : [];
+  const realGames = remaining.filter(([a, b]) => a !== 'BYE' && b !== 'BYE');
+  const byeWins = remaining.filter(([a, b]) => a === 'BYE' || b === 'BYE').map(([a, b]) => a === 'BYE' ? b : a);
+  const names = combined.map(t => t.name);
+  const tagOf = Object.fromEntries(combined.map(t => [t.name, t.tag]));
+  const baseW = Object.fromEntries(combined.map(t => [t.name, t.wins]));
+  const basePF = Object.fromEntries(combined.map(t => [t.name, t.pointsFor]));
+  const LO = remaining.length ? 50 : 0, HI = remaining.length ? 185 : 0;
+
+  function qualify(w, pf){
+    const order = [...names].sort((x, y) => w[y] - w[x] || pf[y] - pf[x]);
+    const cnt = {}, byes = [];
+    order.forEach(n => {
+      cnt[tagOf[n]] = cnt[tagOf[n]] || 0;
+      if (cnt[tagOf[n]] < 2) { cnt[tagOf[n]]++; byes.push(n); }
+    });
+    const field = order.filter(n => !byes.includes(n));
+    return { q: new Set([...byes, ...field.slice(0, 8)]), by: new Set(byes) };
+  }
+
+  const clinched = Object.fromEntries(names.map(n => [n, true]));
+  const byeClinched = Object.fromEntries(names.map(n => [n, true]));
+  const alive = Object.fromEntries(names.map(n => [n, false]));
+  for (let mask = 0; mask < (1 << realGames.length); mask++){
+    const w = {...baseW};
+    byeWins.forEach(n => { w[n]++; });
+    realGames.forEach(([a, b], k) => { w[(mask >> k) & 1 ? b : a]++; });
+    names.forEach(T => {
+      const worst = {}, best = {};
+      names.forEach(n => { worst[n] = basePF[n] + (n === T ? LO : HI); best[n] = basePF[n] + (n === T ? HI : LO); });
+      const pess = qualify(w, worst);
+      if (!pess.q.has(T)) clinched[T] = false;
+      if (!pess.by.has(T)) byeClinched[T] = false;
+      if (qualify(w, best).q.has(T)) alive[T] = true;
+    });
+  }
+
+  const inList = rankedCombined.filter(t => clinched[t.name]);
+  const huntList = rankedCombined.filter(t => !clinched[t.name] && alive[t.name]);
+  const outList = rankedCombined.filter(t => !alive[t.name]);
+  const byeNow = new Set(mainSplit.byes.map(t => t.name)); // top 2 de cada liga hoy
+  const rowHTML = (t, chip) => `
+    <div class="status-row">
+      <span class="lg-dot lg-${t.tag}"></span>
+      <span class="nm">${t.name}</span>
+      ${chip ? '<span class="status-bye">BYE</span>' : ''}
+      <span class="rec">${t.wins}-${t.losses}</span>
+    </div>`;
+  const colHTML = (cls, title, sub, list, chipFn, emptyMsg) => `
+    <div class="status-col ${cls}">
+      <div class="status-title"><span>${title}</span><span class="status-count">${list.length}</span></div>
+      <div class="status-sub">${sub}</div>
+      ${list.length ? list.map(t => rowHTML(t, chipFn && chipFn(t))).join('') : `<div class="status-empty">${emptyMsg}</div>`}
+    </div>`;
+  document.getElementById('status-cols').innerHTML =
+    colHTML('sc-in', '🏆 PlayOffs', 'Lugar asegurado en el bracket general', inList, t => byeNow.has(t.name), 'Todavía nadie.') +
+    colHTML('sc-hunt', '🎯 In The Hunt', 'Todavía pueden entrar', huntList, t => byeNow.has(t.name), 'Nadie.') +
+    colHTML('sc-out', '🍠 Eliminated', 'Ya no alcanzan · Camote Bowl', outList, t => byeNow.has(t.name), 'Nadie.');
+  document.getElementById('status-note').textContent = remaining.length
+    ? `Queda 1 juego (semana ${currentWeek + 1}) · BYE = top 2 de cada liga hoy (bye en primera ronda)`
+    : 'Temporada regular terminada · BYE = top 2 de cada liga (bye en primera ronda)';
+})();
+
+// ---- Tab switching ----
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+</script>
+<script>
+/* =========================================================
+   MÓDULO EN VIVO (Sleeper) — cuadros de Playoffs y Camote Bowl
+   Lee marcadores de la API pública de Sleeper desde el navegador.
+   ========================================================= */
+(function(){
+  const LEAGUE_IDS = ['1388961070965587968', '1405644370555781120'];
+  // Si algún equipo se llama distinto en Sleeper, agrégalo aquí:  'Nombre en reporte': 'Nombre en Sleeper'
+  const ALIASES = {};
+  const REFRESH_MS = 60000;
+  const SLEEPER = 'https://api.sleeper.app/v1';
+  const PROJ = 'https://api.sleeper.com/projections/nfl';
+  const POS = ['QB','RB','WR','TE','K','DEF'];
+
+  const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+  const byName = Object.fromEntries(rankedCombined.map(t => [t.name, t]));
+  const T = n => byName[n];
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // ---------- Definición de los dos cuadros ----------
+  const byes = [...mainSplit.byes].sort((a,b) => a.overallRank - b.overallRank);
+  const wc = wildcardTeams;
+  const cam = campoteCandidates;
+  const WK_R1 = [12,13], WK_QF = [14], WK_SF = [15], WK_F = [16];
+  const ref = (id, take, label) => ({ ref:id, take, label });
+
+  const PLAY = {
+    mode:'win',
+    rounds:[
+      { label:'Ronda 1 · Wild Card', sub:'S12–13 · ida y vuelta', nodes:[
+        { id:'p1', a:wc[0], b:wc[7], weeks:WK_R1 },
+        { id:'p2', a:wc[3], b:wc[4], weeks:WK_R1 },
+        { id:'p3', a:wc[2], b:wc[5], weeks:WK_R1 },
+        { id:'p4', a:wc[1], b:wc[6], weeks:WK_R1 } ]},
+      { label:'Cuartos de Final', sub:'S14', nodes:[
+        { id:'q1', a:byes[0], b:ref('p2','winner','Ganador Ronda 1 · Partido 2'), weeks:WK_QF },
+        { id:'q2', a:byes[1], b:ref('p3','winner','Ganador Ronda 1 · Partido 3'), weeks:WK_QF },
+        { id:'q3', a:byes[2], b:ref('p4','winner','Ganador Ronda 1 · Partido 4'), weeks:WK_QF },
+        { id:'q4', a:byes[3], b:ref('p1','winner','Ganador Ronda 1 · Partido 1'), weeks:WK_QF } ]},
+      { label:'Semifinal', sub:'S15', nodes:[
+        { id:'s1', a:ref('q1','winner','Ganador Cuartos · Partido 1'), b:ref('q2','winner','Ganador Cuartos · Partido 2'), weeks:WK_SF },
+        { id:'s2', a:ref('q3','winner','Ganador Cuartos · Partido 3'), b:ref('q4','winner','Ganador Cuartos · Partido 4'), weeks:WK_SF } ]},
+      { label:'Final', sub:'S16', final:true, nodes:[
+        { id:'f', a:ref('s1','winner','Ganador Semifinal 1'), b:ref('s2','winner','Ganador Semifinal 2'), weeks:WK_F } ]},
+    ],
+    champ:{ icon:'🏆', label:'Campeon', node:'f', take:'winner', empty:'Por definir' }
+  };
+  const CAMO = {
+    mode:'lose',
+    rounds:[
+      { label:'Ronda de Salvación', sub:'S12–13 · ida y vuelta', nodes:[
+        { id:'c1', a:cam[0], b:cam[3], weeks:WK_R1, mode:'win' },
+        { id:'c2', a:cam[1], b:cam[2], weeks:WK_R1, mode:'win' } ]},
+      { label:'Ronda 1', sub:'S14', nodes:[
+        { id:'r1', a:ref('c1','loser','Perdedor Salvación A'), b:cam[9], weeks:WK_QF },
+        { id:'r2', a:cam[6], b:cam[7], weeks:WK_QF },
+        { id:'r3', a:ref('c2','loser','Perdedor Salvación B'), b:cam[8], weeks:WK_QF },
+        { id:'r4', a:cam[4], b:cam[5], weeks:WK_QF } ]},
+      { label:'Semifinal', sub:'S15', nodes:[
+        { id:'t1', a:ref('r1','loser','Perdedor Ronda 1 · Partido 1'), b:ref('r2','loser','Perdedor Ronda 1 · Partido 2'), weeks:WK_SF },
+        { id:'t2', a:ref('r3','loser','Perdedor Ronda 1 · Partido 3'), b:ref('r4','loser','Perdedor Ronda 1 · Partido 4'), weeks:WK_SF } ]},
+      { label:'Final', sub:'S16', final:true, nodes:[
+        { id:'cf', a:ref('t1','loser','Perdedor Semifinal 1'), b:ref('t2','loser','Perdedor Semifinal 2'), weeks:WK_F } ]},
+    ],
+    champ:{ icon:'🍠', label:'El Camote Mayor', node:'cf', take:'loser', empty:'Quien PIERDA la final' }
+  };
+
+  // ---------- Estado en vivo ----------
+  const live = { ok:false, nflWeek:null, scores:{}, proj:{}, unmatched:[], msg:'Conectando con Sleeper…', at:null };
+  const weekDone = w => live.nflWeek != null && live.nflWeek > w;
+
+  function cell(name, w){ return ((live.scores[name]||{})[w]) || null; }
+
+  function resolveNode(n, ctx){
+    const get = x => {
+      if (!x) return null;
+      if (x.ref) { const r = ctx[x.ref]; return r ? (x.take === 'winner' ? r.winner : r.loser) : null; }
+      return x;
+    };
+    const a = get(n.a), b = get(n.b);
+    const res = { a, b, ptsA:null, ptsB:null, pjA:null, pjB:null, complete:false, winner:null, loser:null, leader:null };
+    if (!a || !b) return res;
+    const tot = t => {
+      let pts = 0, pj = 0, any = false, doneAll = true;
+      n.weeks.forEach(w => {
+        const c = cell(t.name, w);
+        const done = weekDone(w);
+        if (!done) doneAll = false;
+        if (c && c.pts != null) { pts += c.pts; any = true; }
+        const proj = c && c.proj != null ? c.proj : null;
+        pj += done ? ((c && c.pts) || 0) : Math.max(proj != null ? proj : 0, (c && c.pts) || 0);
+      });
+      return { pts, pj, any, doneAll };
+    };
+    const A = tot(a), B = tot(b);
+    res.ptsA = A.any ? A.pts : null; res.ptsB = B.any ? B.pts : null;
+    res.pjA = A.pj; res.pjB = B.pj;
+    res.complete = live.ok && A.doneAll && B.doneAll && A.any && B.any;
+    if (A.any && B.any && A.pts !== B.pts) res.leader = A.pts > B.pts ? a : b;
+    if (res.complete) {
+      let w = A.pts === B.pts ? (a.overallRank < b.overallRank ? a : b) : (A.pts > B.pts ? a : b);
+      res.winner = w; res.loser = w === a ? b : a;
+    }
+    return res;
+  }
+
+  function resolveAll(def){
+    const ctx = {};
+    def.rounds.forEach(r => r.nodes.forEach(n => { ctx[n.id] = resolveNode(n, ctx); }));
+    return ctx;
+  }
+
+  const f1 = v => v == null ? '—' : v.toFixed(2);
+  function slotHTML(team, label, pts, pj, cls, showProj){
+    if (!team) return `<div class="slot tbd"><span class="seed"></span><span class="name">${esc(label||'Por definir')}</span></div>`;
+    const pjTxt = showProj && pj != null && pj > 0 ? `<small class="pj">proy. ${pj.toFixed(1)}</small>` : '';
+    return `<div class="slot ${team.tag}-seed ${cls||''}">
+      <span class="seed">${team.overallRank}</span>
+      <span class="name">${esc(team.name)}${pjTxt}</span>
+      <span class="pts">${pts == null ? '' : f1(pts)}</span>
+    </div>`;
+  }
+
+  function render(def, el){
+    const ctx = resolveAll(def);
+    const frag = [];
+    def.rounds.forEach(r => {
+      const nodes = r.nodes.map(n => {
+        const x = ctx[n.id];
+        const mode = n.mode || def.mode;
+        const mk = (side) => {
+          const team = side === 'a' ? x.a : x.b;
+          const ref0 = side === 'a' ? n.a : n.b;
+          const pts = side === 'a' ? x.ptsA : x.ptsB;
+          const pj = side === 'a' ? x.pjA : x.pjB;
+          let cls = '';
+          if (team) {
+            if (x.complete) {
+              const adv = mode === 'win' ? x.winner === team : x.loser === team;
+              cls = adv ? 'adv' : 'out';
+            } else if (x.leader === team) cls = 'lead';
+          }
+          return slotHTML(team, ref0 && ref0.label, pts, pj, cls, !x.complete);
+        };
+        return `<div class="matchup">
+          <div class="connector"></div>
+          ${mk('a')}
+          <div class="vs-divider">vs</div>
+          ${mk('b')}
+        </div>`;
+      }).join('');
+      frag.push(`<div class="round"><div class="round-label">${esc(r.label)}<small>${esc(r.sub)}</small></div>${r.final ? nodes.replace('class="matchup"','class="matchup" style="margin-top:auto;margin-bottom:auto;"') : nodes}</div>`);
+    });
+    const c = def.champ, cn = ctx[c.node];
+    const champ = cn && cn.complete ? (c.take === 'winner' ? cn.winner : cn.loser) : null;
+    frag.push(`<div class="champion-block"><div class="trophy-icon">${c.icon}</div><div class="trophy-label">${esc(c.label)}</div><div class="champion-name">${esc(champ ? champ.name : c.empty)}</div></div>`);
+    el.innerHTML = frag.join('');
+  }
+
+  function statusBar(){
+    let bar = document.getElementById('live-status');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'live-status';
+      const sec = document.getElementById('bracket-section');
+      sec.insertBefore(bar, sec.querySelector('.bracket-panel'));
+    }
+    const t = live.at ? live.at.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '';
+    const warn = live.unmatched.length ? ` · ⚠ sin enlazar: ${live.unmatched.map(esc).join(', ')}` : '';
+    bar.className = live.ok ? 'live-ok' : 'live-wait';
+    bar.innerHTML = `<span class="live-dot"></span>${esc(live.msg)}${t ? ' · actualizado ' + t : ''}${warn}`;
+  }
+
+  function paint(){
+    render(PLAY, document.getElementById('bracket'));
+    render(CAMO, document.getElementById('camote-bracket'));
+    statusBar();
+  }
+
+  // ---------- Sleeper ----------
+  async function jget(url){
+    const r = await fetch(url, { cache:'no-store' });
+    if (!r.ok) throw new Error(url + ' → ' + r.status);
+    return r.json();
+  }
+
+  let meta = null; // por liga: { league, rosterName: Map rosterId→teamName(report) }
+  async function loadMeta(){
+    if (meta) return meta;
+    const wanted = new Map(rankedCombined.map(t => [norm(ALIASES[t.name] || t.name), t.name]));
+    const out = [];
+    const found = new Set();
+    for (const id of LEAGUE_IDS) {
+      const [league, users, rosters] = await Promise.all([
+        jget(`${SLEEPER}/league/${id}`), jget(`${SLEEPER}/league/${id}/users`), jget(`${SLEEPER}/league/${id}/rosters`)
+      ]);
+      const uById = new Map(users.map(u => [u.user_id, u]));
+      const map = new Map();
+      rosters.forEach(r => {
+        const u = uById.get(r.owner_id);
+        const cands = [u && u.metadata && u.metadata.team_name, u && u.display_name, u && u.username].filter(Boolean);
+        for (const c of cands) {
+          const hit = wanted.get(norm(c));
+          if (hit) { map.set(r.roster_id, hit); found.add(hit); break; }
+        }
+      });
+      out.push({ id, league, map });
+    }
+    live.unmatched = rankedCombined.map(t => t.name).filter(n => !found.has(n));
+    meta = out;
+    return meta;
+  }
+
+  function leaguePts(stats, scoring){
+    let p = 0;
+    for (const k in scoring) if (stats[k] != null) p += stats[k] * scoring[k];
+    return p;
+  }
+
+  async function loadProjections(season, week, scoring){
+    const q = POS.map(p => 'position[]=' + p).join('&');
+    const arr = await jget(`${PROJ}/${season}/${week}?season_type=regular&${q}`);
+    const m = new Map();
+    arr.forEach(x => { if (x && x.player_id && x.stats) m.set(String(x.player_id), leaguePts(x.stats, scoring)); });
+    return m;
+  }
+
+  async function refresh(){
+    try {
+      const st = await jget(`${SLEEPER}/state/nfl`);
+      live.nflWeek = (st.season_type === 'post' || st.season_type === 'off') ? 99 : st.week;
+      const m = await loadMeta();
+      const weeks = [...new Set([...WK_R1, ...WK_QF, ...WK_SF, ...WK_F])].filter(w => w <= (live.nflWeek === 99 ? 99 : live.nflWeek + 0));
+      const scores = {};
+      for (const lg of m) {
+        const season = lg.league.season;
+        const scoring = lg.league.scoring_settings || {};
+        for (const w of weeks) {
+          let ms = [];
+          try { ms = await jget(`${SLEEPER}/league/${lg.id}/matchups/${w}`); } catch(e) { continue; }
+          let pm = null;
+          if (!weekDone(w)) { try { pm = await loadProjections(season, w, scoring); } catch(e) { pm = null; } }
+          ms.forEach(x => {
+            const name = lg.map.get(x.roster_id); if (!name) return;
+            const starters = (x.starters || []).filter(s => s && s !== '0');
+            const proj = pm ? starters.reduce((s, id) => s + (pm.get(String(id)) || 0), 0) : null;
+            (scores[name] = scores[name] || {})[w] = { pts: typeof x.points === 'number' ? x.points : null, proj };
+          });
+        }
+      }
+      live.scores = scores; live.ok = true; live.at = new Date();
+      live.msg = live.nflWeek === 99 ? 'Temporada terminada' : (live.nflWeek < 12 ? `En vivo · conectado a Sleeper (semana ${live.nflWeek}; playoffs inician en la semana 12)` : `En vivo · semana ${live.nflWeek}`);
+    } catch (e) {
+      live.msg = live.ok ? 'No se pudo actualizar; mostrando el último dato' : 'Esperando datos de Sleeper…';
+      if (window.console) console.warn('[live]', e);
+    }
+    paint();
+  }
+
+  // estilos
+  const css = document.createElement('style');
+  css.textContent = `
+    #live-status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--chalk-dim);margin:-6px 0 10px}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:#8a8a8a;display:inline-block;flex:none}
+    #live-status.live-ok .live-dot{background:#4fd16f;box-shadow:0 0 0 0 rgba(79,209,111,.6);animation:livepulse 1.8s infinite}
+    @keyframes livepulse{70%{box-shadow:0 0 0 7px rgba(79,209,111,0)}100%{box-shadow:0 0 0 0 rgba(79,209,111,0)}}
+    .round-label small{display:block;font-size:8.5px;letter-spacing:.06em;opacity:.75;margin-top:2px;text-transform:none}
+    .slot .name small.pj{display:block;font-size:9px;opacity:.65;font-style:normal;line-height:1.1}
+    .slot .pts{font-variant-numeric:tabular-nums;font-weight:600;font-size:11.5px;white-space:nowrap}
+    .slot.lead{box-shadow:inset 0 0 0 1px rgba(143,207,159,.5),0 1px 3px rgba(0,0,0,.25)}
+    .slot.adv{box-shadow:inset 0 0 0 1px var(--gold),0 1px 3px rgba(0,0,0,.25)}
+    .slot.adv .pts::after{content:" ✓";color:var(--gold)}
+    .slot.out{opacity:.5}
+  `;
+  document.head.appendChild(css);
+
+  paint();                    // dibujo inicial (sin marcadores)
+  refresh();
+  setInterval(() => { if (!document.hidden) refresh(); }, REFRESH_MS);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  window.__live = { live, refresh, PLAY, CAMO, resolveAll };
+})();
+
+</script>
+</body>
+</html>
