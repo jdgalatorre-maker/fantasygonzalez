@@ -955,13 +955,13 @@ const leagueA = {
   color: "cardinal",     // coincide con --cardinal en CSS
   teams: [
     { name: "SteelersLaguna", wins: 5, losses: 6, pointsFor: 1188.80, weekPoints: 99.56 },
-    { name: "Dr Patrick", wins: 8, losses: 3, pointsFor: 1333.16, weekPoints: 117.90 },
+    { name: "Dr Pat", wins: 8, losses: 3, pointsFor: 1333.16, weekPoints: 117.90 },
     { name: "Galacticos", wins: 9, losses: 2, pointsFor: 1249.14, weekPoints: 111.06 },
     { name: "Los Rifles 2.0", wins: 6, losses: 5, pointsFor: 1188.68, weekPoints: 111.36 },
     { name: "Color Esperanza", wins: 6, losses: 5, pointsFor: 1153.78, weekPoints: 106.44 },
     { name: "Capitan JC", wins: 4, losses: 7, pointsFor: 1208.88, weekPoints: 100.76 },
     { name: "Beard of Steel", wins: 9, losses: 2, pointsFor: 1100.16, weekPoints: 118.00 },
-    { name: "Chuy", wins: 2, losses: 9, pointsFor: 1001.44, weekPoints: 88.66 },
+    { name: "Teamjesusarias97", wins: 2, losses: 9, pointsFor: 1001.44, weekPoints: 88.66 },
     { name: "Real Bañil", wins: 6, losses: 5, pointsFor: 1152.02, weekPoints: 80.10 },
     { name: "CacaLoapanPushers", wins: 6, losses: 5, pointsFor: 1140.46, weekPoints: 75.90 },
     { name: "Pending Wiki", wins: 5, losses: 6, pointsFor: 1021.10, weekPoints: 95.34 },
@@ -1197,11 +1197,11 @@ const sortedB = renderLeagueTab(leagueB, 'jesus-panel', 'jesus-headline', 'jesus
 // Racha actual de cada equipo (W = victorias seguidas, L = derrotas seguidas).
 // EDITA esto cada semana, usando el nombre exacto del equipo.
 const streaks = {
-  "Galacticos": "2W", "Dr Patrick": "5W", "Los Marrones": "2L", "Capitan JC": "6L",
+  "Galacticos": "2W", "Dr Pat": "5W", "Los Marrones": "2L", "Capitan JC": "6L",
   "DanielAD85": "2L", "SteelersLaguna": "3L", "Peor Pesadilla": "1L", "TEPOS": "2W",
   "Los Rifles 2.0": "1W", "THE BOYZ": "1W", "pablogutig": "1W", "Color Esperanza": "1W",
   "CacaLoapanPushers": "2L", "Martha": "1L", "RODCKERS": "1L", "Steel Armonico": "2W",
-  "Beard of Steel": "8W", "Luisramon98": "1W", "SanPancho85": "4W", "Chuy": "1L",
+  "Beard of Steel": "8W", "Luisramon98": "1W", "SanPancho85": "4W", "Teamjesusarias97": "1L",
   "Real Bañil": "5W", "Pending Wiki": "1L",
 };
 
@@ -1212,13 +1212,13 @@ const prevSnapshot = {
   week: 10,
   teams: {
     "SteelersLaguna": [5,5,1089.24],
-    "Dr Patrick": [7,3,1215.26],
+    "Dr Pat": [7,3,1215.26],
     "Galacticos": [8,2,1138.08],
     "Los Rifles 2.0": [5,5,1077.32],
     "Color Esperanza": [5,5,1047.34],
     "Capitan JC": [4,6,1108.12],
     "Beard of Steel": [8,2,982.16],
-    "Chuy": [2,8,912.78],
+    "Teamjesusarias97": [2,8,912.78],
     "Real Bañil": [5,5,1071.92],
     "CacaLoapanPushers": [6,4,1064.56],
     "Pending Wiki": [5,5,925.76],
@@ -1248,7 +1248,7 @@ function movementHTML(t){
   return `<div class="mv same">—</div>`;
 }
 
-const preProb = {"SteelersLaguna": [43, 0], "Dr Patrick": [100, 65], "Galacticos": [100, 86], "Los Rifles 2.0": [44, 0], "Color Esperanza": [44, 0], "Capitan JC": [0, 0], "Beard of Steel": [100, 50], "Chuy": [0, 0], "Real Bañil": [89, 0], "CacaLoapanPushers": [90, 0], "Pending Wiki": [2, 0], "TEPOS": [65, 0], "Steel Armonico": [8, 0], "RODCKERS": [64, 0], "Los Marrones": [100, 100], "DanielAD85": [100, 64], "Peor Pesadilla": [100, 11], "THE BOYZ": [46, 0], "Martha": [0, 0], "pablogutig": [100, 25], "Luisramon98": [2, 0], "SanPancho85": [0, 0]};
+const preProb = {"SteelersLaguna": [43, 0], "Dr Pat": [100, 65], "Galacticos": [100, 86], "Los Rifles 2.0": [44, 0], "Color Esperanza": [44, 0], "Capitan JC": [0, 0], "Beard of Steel": [100, 50], "Teamjesusarias97": [0, 0], "Real Bañil": [89, 0], "CacaLoapanPushers": [90, 0], "Pending Wiki": [2, 0], "TEPOS": [65, 0], "Steel Armonico": [8, 0], "RODCKERS": [64, 0], "Los Marrones": [100, 100], "DanielAD85": [100, 64], "Peor Pesadilla": [100, 11], "THE BOYZ": [46, 0], "Martha": [0, 0], "pablogutig": [100, 25], "Luisramon98": [2, 0], "SanPancho85": [0, 0]};
 // % de entrar a playoffs (y de bye) calculado antes de la semana 11 (simulación)
 const rankingsBody = document.getElementById('rankings-body');
 rankingsBody.innerHTML = rankedCombined.map((t) => {
@@ -1297,7 +1297,7 @@ const resultsMatchups = {
   cuca: [
     ["BYE", "Real Bañil"], ["Color Esperanza", "Pending Wiki"],
     ["Los Rifles 2.0", "Capitan JC"], ["Beard of Steel", "CacaLoapanPushers"],
-    ["Galacticos", "SteelersLaguna"], ["Dr Patrick", "Chuy"],
+    ["Galacticos", "SteelersLaguna"], ["Dr Pat", "Teamjesusarias97"],
   ],
   jesus: [
     ["Peor Pesadilla", "pablogutig"], ["THE BOYZ", "BYE"],
@@ -1386,7 +1386,7 @@ if (realityCheck.week !== currentWeek) document.getElementById('recap-reality-ch
 // Esto NO se calcula solo — edita esta lista cada semana con los equipos que
 // quieras resaltar (usa el nombre exacto como está en leagueA/leagueB).
 const playoffWatchWeek = 3; // si no coincide con currentWeek, la tarjeta se oculta
-const playoffWatch = ["Dr Patrick", "SteelersLaguna", "Galacticos"];
+const playoffWatch = ["Dr Pat", "SteelersLaguna", "Galacticos"];
 document.getElementById('recap-playoff-watch').innerHTML = `
   <div class="spotlight-emoji">🚀</div>
   <div class="spotlight-body">
