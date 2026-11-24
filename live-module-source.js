@@ -65,7 +65,7 @@
   };
 
   // ---------- Estado en vivo ----------
-  const live = { ok:false, nflWeek:null, scores:{}, proj:{}, unmatched:[], msg:'Conectando con Sleeper…', at:null };
+  const live = { ok:false, nflWeek:null, scores:{}, proj:{}, rosters:{}, players:null, unmatched:[], msg:'Conectando con Sleeper…', at:null };
   const weekDone = w => live.nflWeek != null && live.nflWeek > w;
 
   function cell(name, w){ return ((live.scores[name]||{})[w]) || null; }
@@ -113,7 +113,7 @@
   function slotHTML(team, label, pts, pj, cls, showProj){
     if (!team) return `<div class="slot tbd"><span class="seed"></span><span class="name">${esc(label||'Por definir')}</span></div>`;
     const pjTxt = showProj && pj != null && pj > 0 ? `<small class="pj">proy. ${pj.toFixed(1)}</small>` : '';
-    return `<div class="slot ${team.tag}-seed ${cls||''}">
+    return `<div class="slot ${team.tag}-seed ${cls||''}" data-team="${esc(team.name)}" title="Ver alineación">
       <span class="seed">${team.overallRank}</span>
       <span class="name">${esc(team.name)}${pjTxt}</span>
       <span class="pts">${pts == null ? '' : f1(pts)}</span>
@@ -229,7 +229,9 @@
       const st = await jget(`${SLEEPER}/state/nfl`);
       live.nflWeek = (st.season_type === 'post' || st.season_type === 'off') ? 99 : st.week;
       const m = await loadMeta();
-      const weeks = [...new Set([...WK_R1, ...WK_QF, ...WK_SF, ...WK_F])].filter(w => w <= (live.nflWeek === 99 ? 99 : live.nflWeek + 0));
+      const pw = [...WK_R1, ...WK_QF, ...WK_SF, ...WK_F];
+      const weeks = [...new Set([...pw.filter(w => w <= live.nflWeek), ...(live.nflWeek >= 1 && live.nflWeek <= 18 ? [live.nflWeek] : [16])])];
+      const rosters = {};
       const scores = {};
       for (const lg of m) {
         const season = lg.league.season;
@@ -244,10 +246,13 @@
             const starters = (x.starters || []).filter(s => s && s !== '0');
             const proj = pm ? starters.reduce((s, id) => s + (pm.get(String(id)) || 0), 0) : null;
             (scores[name] = scores[name] || {})[w] = { pts: typeof x.points === 'number' ? x.points : null, proj };
+            const pp = {};
+            (x.players || []).forEach(id => { pp[id] = pm ? (pm.get(String(id)) || 0) : null; });
+            (rosters[name] = rosters[name] || {})[w] = { starters: x.starters || [], players: x.players || [], sp: x.starters_points || [], ppts: x.players_points || {}, pp, pos: lg.league.roster_positions || [] };
           });
         }
       }
-      live.scores = scores; live.ok = true; live.at = new Date();
+      live.scores = scores; live.rosters = rosters; live.ok = true; live.at = new Date();
       live.msg = live.nflWeek === 99 ? 'Temporada terminada' : (live.nflWeek < 12 ? `En vivo · conectado a Sleeper (semana ${live.nflWeek}; playoffs inician en la semana 12)` : `En vivo · semana ${live.nflWeek}`);
     } catch (e) {
       live.msg = live.ok ? 'No se pudo actualizar; mostrando el último dato' : 'Esperando datos de Sleeper…';
@@ -255,6 +260,63 @@
     }
     paint();
   }
+
+
+  // ---------- Alineación (clic en un equipo) ----------
+  let modal = null, modalTeam = null, modalWeek = null;
+  async function loadPlayers(){
+    if (live.players) return live.players;
+    try {
+      const all = await jget(`${SLEEPER}/players/nfl`);
+      const m = {};
+      for (const id in all) { const p = all[id]; m[id] = { n: p.full_name || ((p.first_name||'') + ' ' + (p.last_name||'')).trim() || id, pos: p.position || (p.fantasy_positions||[])[0] || '', tm: p.team || 'FA' }; }
+      live.players = m;
+    } catch(e) { live.players = {}; }
+    return live.players;
+  }
+  function openRoster(name, week){
+    modalTeam = name;
+    const rr = live.rosters[name] || {};
+    const ws = Object.keys(rr).map(Number).sort((a,b) => a - b);
+    modalWeek = week && rr[week] ? week : (ws.includes(live.nflWeek) ? live.nflWeek : ws[ws.length - 1]);
+    if (!modal) {
+      modal = document.createElement('div'); modal.id = 'roster-modal';
+      modal.addEventListener('click', e => { if (e.target === modal || e.target.closest('[data-close]')) closeRoster(); const wb = e.target.closest('[data-wk]'); if (wb) openRoster(modalTeam, +wb.dataset.wk); });
+      document.body.appendChild(modal);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRoster(); });
+    }
+    modal.classList.add('open');
+    drawRoster();
+    if (!live.players) loadPlayers().then(() => { if (modal.classList.contains('open')) drawRoster(); });
+  }
+  function closeRoster(){ if (modal) modal.classList.remove('open'); }
+  function drawRoster(){
+    const t = T(modalTeam), rr = live.rosters[modalTeam] || {};
+    const ws = Object.keys(rr).map(Number).sort((a,b) => a - b);
+    const d = rr[modalWeek];
+    const P = live.players || {};
+    const pl = id => P[id] || { n: /^[A-Z]{2,3}$/.test(id) ? id + ' DEF' : (live.players ? 'Jugador ' + id : '…'), pos: '', tm: '' };
+    const slots = (d && d.pos ? d.pos.filter(x => x !== 'BN' && x !== 'IR' && x !== 'TAXI') : []);
+    const row = (slot, id, pts, pj) => {
+      if (!id || id === '0') return `<div class="rr empty"><span class="rs">${esc(slot)}</span><span class="rn">Vacío</span><span class="rp">—</span></div>`;
+      const p = pl(id);
+      return `<div class="rr"><span class="rs">${esc(slot)}</span><span class="rn">${esc(p.n)}<small>${esc([p.pos, p.tm].filter(Boolean).join(' · '))}${pj != null && pj > 0 ? ' · proy. ' + pj.toFixed(1) : ''}</small></span><span class="rp">${pts == null ? '—' : Number(pts).toFixed(2)}</span></div>`;
+    };
+    let body = '<div class="rmsg">Aún no hay alineación de Sleeper para este equipo.</div>';
+    if (d) {
+      const st = d.starters.map((id, i) => row(slots[i] || 'FLEX', id, d.sp[i], d.pp[id])).join('');
+      const bench = d.players.filter(id => !d.starters.includes(id)).map(id => row('BN', id, d.ppts[id], d.pp[id])).join('');
+      const tot = d.sp.reduce((a, b) => a + (b || 0), 0);
+      body = `<div class="rsec">Titulares <b>${tot.toFixed(2)}</b></div>${st}<div class="rsec">Banca</div>${bench || '<div class="rmsg">Sin jugadores en banca.</div>'}`;
+    }
+    modal.innerHTML = `<div class="rcard"><div class="rhead"><div><div class="rtitle">${esc(modalTeam)}</div><div class="rsub">${t ? '#' + t.overallRank + ' · ' + esc(t.league) + ' · ' + t.wins + '-' + t.losses : ''}</div></div><button data-close aria-label="Cerrar">✕</button></div>
+      <div class="rweeks">${ws.map(w => `<button data-wk="${w}" class="${w === modalWeek ? 'on' : ''}">S${w}</button>`).join('')}</div>
+      <div class="rbody">${body}</div></div>`;
+  }
+  document.addEventListener('click', e => {
+    const s = e.target.closest('.slot[data-team]'); if (s) return openRoster(s.dataset.team);
+    const td = e.target.closest('#rankings-body td:nth-child(2)'); if (td && T(td.textContent.trim())) openRoster(td.textContent.trim());
+  });
 
   // estilos
   const css = document.createElement('style');
@@ -270,6 +332,27 @@
     .slot.adv{box-shadow:inset 0 0 0 1px var(--gold),0 1px 3px rgba(0,0,0,.25)}
     .slot.adv .pts::after{content:" ✓";color:var(--gold)}
     .slot.out{opacity:.5}
+
+    .slot[data-team], #rankings-body td:nth-child(2){cursor:pointer}
+    .slot[data-team]:hover{filter:brightness(1.15)}
+    #rankings-body td:nth-child(2):hover{text-decoration:underline;text-decoration-color:var(--gold)}
+    #roster-modal{position:fixed;inset:0;background:rgba(0,0,0,.62);display:none;align-items:center;justify-content:center;z-index:50;padding:14px}
+    #roster-modal.open{display:flex}
+    .rcard{background:var(--ink,#0f1d16);border:1px solid var(--gold-dim);border-radius:8px;width:min(440px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+    .rhead{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 8px}
+    .rtitle{font-family:'Oswald',sans-serif;font-size:20px;color:var(--chalk)}
+    .rsub{font-size:12px;color:var(--chalk-dim)}
+    .rhead button{background:none;border:0;color:var(--chalk-dim);font-size:18px;cursor:pointer}
+    .rweeks{display:flex;gap:6px;padding:0 16px 8px;flex-wrap:wrap}
+    .rweeks button{background:var(--field);border:1px solid var(--line);color:var(--chalk-dim);border-radius:12px;padding:3px 10px;font-size:11px;cursor:pointer}
+    .rweeks button.on{background:var(--gold);color:#1b1b1b;border-color:var(--gold)}
+    .rbody{overflow:auto;padding:0 16px 14px}
+    .rsec{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:10px 0 4px;display:flex;justify-content:space-between;border-bottom:1px solid var(--gold-dim);padding-bottom:3px}
+    .rr{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px}
+    .rr .rs{width:34px;font-size:10px;color:var(--chalk-dim);font-family:'Oswald',sans-serif;letter-spacing:.05em}
+    .rr .rn{flex:1;color:var(--chalk)} .rr .rn small{display:block;font-size:10px;color:var(--chalk-dim)}
+    .rr .rp{font-variant-numeric:tabular-nums;font-weight:600}
+    .rr.empty{opacity:.5} .rmsg{font-size:12px;color:var(--chalk-dim);font-style:italic;padding:8px 0}
   `;
   document.head.appendChild(css);
 
