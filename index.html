@@ -1854,7 +1854,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       sec.insertBefore(bar, sec.querySelector('.bracket-panel'));
     }
     const t = live.at ? live.at.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '';
-    const warn = live.unmatched.length ? ` · ⚠ sin enlazar: ${live.unmatched.map(esc).join(', ')}` : '';
+    const warn = (live.unmatched.length ? ` · ⚠ sin enlazar: ${live.unmatched.map(esc).join(', ')}` + (live.leftover && live.leftover.length ? ` (nombres sin usar en Sleeper: ${live.leftover.map(esc).join(', ')})` : '') : '') + (live.fuzzy && live.fuzzy.length ? ` · enlazados por parecido: ${live.fuzzy.map(esc).join('; ')}` : '');
     bar.className = live.ok ? 'live-ok' : 'live-wait';
     bar.innerHTML = `<span class="live-dot"></span>${esc(live.msg)}${t ? ' · actualizado ' + t : ''}${warn}`;
   }
@@ -1873,28 +1873,73 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   }
 
   let meta = null; // por liga: { league, rosterName: Map rosterId→teamName(report) }
+  function lev(a, b){
+    const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+    let prev = Array.from({length:n+1}, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i];
+      for (let j = 1; j <= n; j++) cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+      prev = cur;
+    }
+    return prev[n];
+  }
+  function dist(x, y){
+    if (!x || !y) return 99;
+    if (x.includes(y) || y.includes(x)) return Math.abs(x.length - y.length) * 0.2;
+    return lev(x, y);
+  }
   async function loadMeta(){
     if (meta) return meta;
     const wanted = new Map(rankedCombined.map(t => [norm(ALIASES[t.name] || t.name), t.name]));
     const out = [];
     const found = new Set();
+    live.fuzzy = [];
     for (const id of LEAGUE_IDS) {
       const [league, users, rosters] = await Promise.all([
         jget(`${SLEEPER}/league/${id}`), jget(`${SLEEPER}/league/${id}/users`), jget(`${SLEEPER}/league/${id}/rosters`)
       ]);
       const uById = new Map(users.map(u => [u.user_id, u]));
       const map = new Map();
+      const cands = new Map(); // rosterId → [nombres posibles]
       rosters.forEach(r => {
         const u = uById.get(r.owner_id);
-        const cands = [u && u.metadata && u.metadata.team_name, u && u.display_name, u && u.username].filter(Boolean);
-        for (const c of cands) {
+        const cs = [u && u.metadata && u.metadata.team_name, u && u.display_name, u && u.username].filter(Boolean);
+        cands.set(r.roster_id, cs);
+        for (const c of cs) {
           const hit = wanted.get(norm(c));
-          if (hit) { map.set(r.roster_id, hit); found.add(hit); break; }
+          if (hit && !found.has(hit)) { map.set(r.roster_id, hit); found.add(hit); break; }
         }
       });
-      out.push({ id, league, map });
+      out.push({ id, league, map, cands, rosters });
     }
+    // liga del reporte a la que corresponde cada liga de Sleeper (por mayoría de coincidencias)
+    out.forEach(lg => {
+      const cnt = {};
+      lg.map.forEach(n => { const tg = T(n).tag; cnt[tg] = (cnt[tg] || 0) + 1; });
+      lg.tag = Object.keys(cnt).sort((x, y) => cnt[y] - cnt[x])[0];
+    });
+    // emparejar por parecido los que faltan, dentro de su liga
+    out.forEach(lg => {
+      const missT = rankedCombined.filter(t => t.tag === lg.tag && !found.has(t.name)).map(t => t.name);
+      const missR = lg.rosters.map(r => r.roster_id).filter(id => !lg.map.has(id));
+      if (!missT.length || !missR.length) return;
+      const score = (tn, rid) => Math.min(...lg.cands.get(rid).map(c => dist(norm(tn), norm(c))).concat([99]));
+      // todas las asignaciones posibles (pocos faltantes), la de menor distancia total
+      let best = null;
+      const rec = (i, used, acc, tot) => {
+        if (i === missT.length) { if (!best || tot < best.tot) best = { tot, acc: [...acc] }; return; }
+        rec(i + 1, used, acc, tot + (missT.length === missR.length ? 40 : 6)); // dejar sin asignar es caro si sobran los mismos de cada lado
+        missR.forEach(rid => { if (!used.has(rid)) { used.add(rid); acc.push([missT[i], rid]); rec(i + 1, used, acc, tot + score(missT[i], rid)); acc.pop(); used.delete(rid); } });
+      };
+      if (missT.length <= 5) rec(0, new Set(), [], 0);
+      if (best) best.acc.forEach(([tn, rid]) => {
+        lg.map.set(rid, tn); found.add(tn);
+        live.fuzzy.push(`${tn} ≈ “${lg.cands.get(rid)[0] || rid}”`);
+      });
+    });
     live.unmatched = rankedCombined.map(t => t.name).filter(n => !found.has(n));
+    live.leftover = [];
+    out.forEach(lg => lg.rosters.forEach(r => { if (!lg.map.has(r.roster_id)) live.leftover.push(lg.cands.get(r.roster_id)[0] || ('roster ' + r.roster_id)); }));
     meta = out;
     return meta;
   }
