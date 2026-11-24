@@ -961,7 +961,7 @@ const leagueA = {
     { name: "Color Esperanza", wins: 6, losses: 5, pointsFor: 1153.78, weekPoints: 106.44 },
     { name: "Capitan JC", wins: 4, losses: 7, pointsFor: 1208.88, weekPoints: 100.76 },
     { name: "Beard of Steel", wins: 9, losses: 2, pointsFor: 1100.16, weekPoints: 118.00 },
-    { name: "Teamjesusarias97", wins: 2, losses: 9, pointsFor: 1001.44, weekPoints: 88.66 },
+    { name: "jesusarias97", wins: 2, losses: 9, pointsFor: 1001.44, weekPoints: 88.66 },
     { name: "Real Bañil", wins: 6, losses: 5, pointsFor: 1152.02, weekPoints: 80.10 },
     { name: "CacaLoapanPushers", wins: 6, losses: 5, pointsFor: 1140.46, weekPoints: 75.90 },
     { name: "Pending Wiki", wins: 5, losses: 6, pointsFor: 1021.10, weekPoints: 95.34 },
@@ -1201,7 +1201,7 @@ const streaks = {
   "DanielAD85": "2L", "SteelersLaguna": "3L", "Peor Pesadilla": "1L", "TEPOS": "2W",
   "Los Rifles 2.0": "1W", "THE BOYZ": "1W", "pablogutig": "1W", "Color Esperanza": "1W",
   "CacaLoapanPushers": "2L", "Martha": "1L", "RODCKERS": "1L", "Steel Armonico": "2W",
-  "Beard of Steel": "8W", "Luisramon98": "1W", "SanPancho85": "4W", "Teamjesusarias97": "1L",
+  "Beard of Steel": "8W", "Luisramon98": "1W", "SanPancho85": "4W", "jesusarias97": "1L",
   "Real Bañil": "5W", "Pending Wiki": "1L",
 };
 
@@ -1218,7 +1218,7 @@ const prevSnapshot = {
     "Color Esperanza": [5,5,1047.34],
     "Capitan JC": [4,6,1108.12],
     "Beard of Steel": [8,2,982.16],
-    "Teamjesusarias97": [2,8,912.78],
+    "jesusarias97": [2,8,912.78],
     "Real Bañil": [5,5,1071.92],
     "CacaLoapanPushers": [6,4,1064.56],
     "Pending Wiki": [5,5,925.76],
@@ -1248,7 +1248,7 @@ function movementHTML(t){
   return `<div class="mv same">—</div>`;
 }
 
-const preProb = {"SteelersLaguna": [43, 0], "Dr Pat": [100, 65], "Galacticos": [100, 86], "Los Rifles 2.0": [44, 0], "Color Esperanza": [44, 0], "Capitan JC": [0, 0], "Beard of Steel": [100, 50], "Teamjesusarias97": [0, 0], "Real Bañil": [89, 0], "CacaLoapanPushers": [90, 0], "Pending Wiki": [2, 0], "TEPOS": [65, 0], "Steel Armonico": [8, 0], "RODCKERS": [64, 0], "Los Marrones": [100, 100], "DanielAD85": [100, 64], "Peor Pesadilla": [100, 11], "THE BOYZ": [46, 0], "Martha": [0, 0], "pablogutig": [100, 25], "Luisramon98": [2, 0], "SanPancho85": [0, 0]};
+const preProb = {"SteelersLaguna": [43, 0], "Dr Pat": [100, 65], "Galacticos": [100, 86], "Los Rifles 2.0": [44, 0], "Color Esperanza": [44, 0], "Capitan JC": [0, 0], "Beard of Steel": [100, 50], "jesusarias97": [0, 0], "Real Bañil": [89, 0], "CacaLoapanPushers": [90, 0], "Pending Wiki": [2, 0], "TEPOS": [65, 0], "Steel Armonico": [8, 0], "RODCKERS": [64, 0], "Los Marrones": [100, 100], "DanielAD85": [100, 64], "Peor Pesadilla": [100, 11], "THE BOYZ": [46, 0], "Martha": [0, 0], "pablogutig": [100, 25], "Luisramon98": [2, 0], "SanPancho85": [0, 0]};
 // % de entrar a playoffs (y de bye) calculado antes de la semana 11 (simulación)
 const rankingsBody = document.getElementById('rankings-body');
 rankingsBody.innerHTML = rankedCombined.map((t) => {
@@ -1297,7 +1297,7 @@ const resultsMatchups = {
   cuca: [
     ["BYE", "Real Bañil"], ["Color Esperanza", "Pending Wiki"],
     ["Los Rifles 2.0", "Capitan JC"], ["Beard of Steel", "CacaLoapanPushers"],
-    ["Galacticos", "SteelersLaguna"], ["Dr Pat", "Teamjesusarias97"],
+    ["Galacticos", "SteelersLaguna"], ["Dr Pat", "jesusarias97"],
   ],
   jesus: [
     ["Peor Pesadilla", "pablogutig"], ["THE BOYZ", "BYE"],
@@ -2094,7 +2094,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, REFRESH_MS);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
-  window.__live = { live, refresh, PLAY, CAMO, resolveAll };
+  window.__live = { live, refresh, paint, PLAY, CAMO, resolveAll };
 })();
 
 </script>

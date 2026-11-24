@@ -405,5 +405,5 @@
   refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, REFRESH_MS);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
-  window.__live = { live, refresh, PLAY, CAMO, resolveAll };
+  window.__live = { live, refresh, paint, PLAY, CAMO, resolveAll };
 })();
