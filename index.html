@@ -7,6 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  .league-panel th:last-child, .league-panel td:last-child{ padding-left:16px; }
+  #tab-vivo .main-split{ margin-top:22px; }
+  @media (min-width:900px){ .vivo-split{ grid-template-areas:"table games"; } }
+  #lv-bar{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--chalk-dim); margin:-4px 0 10px; }
+  #lv-bar .live-dot{ width:8px; height:8px; border-radius:50%; background:#8a8a8a; flex:none; }
+  #lv-bar.ok .live-dot{ background:#4fd16f; animation:livepulse 1.8s infinite; }
+  .lv-play{ display:inline-block; width:7px; height:7px; border-radius:50%; background:#4fd16f; margin-left:6px; vertical-align:middle; }
+  #lv-games .game-row[data-team]{ cursor:pointer; }
+  #lv-games .gname small.pj{ font-size:9px; opacity:.65; margin-left:6px; }
+  #lv-games .wk-state{ font-size:11px; color:var(--gold); margin:0 0 8px; letter-spacing:.04em; }
+  .status-pct{ font-size:10px; font-weight:600; letter-spacing:.04em; color:var(--gold); border:1px solid var(--gold-dim); border-radius:10px; padding:1px 6px; white-space:nowrap; }
   :root{
     --ink:#10231A;
     --field:#1B3A2C;
@@ -95,12 +106,12 @@
     white-space:nowrap;
     flex-shrink:0;
     font-family:'Oswald',sans-serif;
-    font-size:15px;
-    letter-spacing:0.03em;
+    font-size:14px;
+    letter-spacing:0.02em;
     background:none;
     border:none;
     color:var(--chalk-dim);
-    padding:12px 20px;
+    padding:12px 13px;
     cursor:pointer;
     border-radius:3px 3px 0 0;
     position:relative;
@@ -380,6 +391,11 @@
     margin-bottom:6px;
   }
   .games-col-title .lg-dot{ margin-left:0; }
+  .games-col-title.xw{ margin:12px 0 6px; }
+  .xweeks{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:18px; }
+  .xg .game{ margin-bottom:8px; }
+  .games-col-title.xw{ font-size:13px; }
+  .xg .game-row .lg-dot{ margin:0 6px 0 0; }
   .games-2col .gname{ min-width:0; overflow-wrap:anywhere; }
   .group-title{
     font-family:'Oswald',sans-serif;
@@ -541,7 +557,7 @@
   .main-split .ledger{ max-width:none; margin:0; }
   .main-split > *, .blk-status{ min-width:0; max-width:100%; }
   .blk-status section + section{ margin-top:18px !important; }
-  .blk-recap{ order:1; } .blk-status{ order:2; } .blk-table{ order:3; } .blk-games{ order:4; }
+  .blk-recap{ order:1; } .blk-table{ order:2; } .blk-status{ order:3; } .blk-games{ order:4; }
   .blk-recap .section-head, .blk-status .section-head{ margin-bottom:10px; }
   .blk-recap .recap-cards{ gap:10px; }
   .blk-recap .move-blocks{ margin-top:0; }
@@ -597,12 +613,13 @@
   @media (min-width:900px){
     .main-split{
       grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
-      grid-template-areas:"recap recap" "status status" "table games";
+      grid-template-areas:"recap recap" "table games" "status status";
     }
     .blk-recap{ grid-area:recap; order:0; }
     .blk-status{ grid-area:status; order:0; }
     .blk-table{ grid-area:table; order:0; }
     .blk-games{ grid-area:games; order:0; }
+    .blk-status{ margin-top:6px; }
   }
   .ledger-legend{
     font-size:11px;
@@ -797,7 +814,10 @@
     <div class="week-tag" id="week-tag">Semana 14 · Datos de ejemplo</div>
   </div>
   <div class="tabs" id="tabs">
-    <button class="tab-btn active" data-tab="resumen"><span class="tab-dot"></span>Resumen Semanal</button>
+    <button class="tab-btn active" data-tab="vivo"><span class="tab-dot"></span>Clasificación en Vivo</button>
+    <button class="tab-btn" data-tab="resumen"><span class="tab-dot"></span>Resumen Semanal</button>
+    <button class="tab-btn" data-tab="camote"><span class="tab-dot"></span>PlayOffs &amp; Camote Bowl</button>
+    <button class="tab-btn" data-tab="proximos"><span class="tab-dot"></span>Próximos Juegos</button>
     <button class="tab-btn" data-tab="cuca"><span class="tab-dot"></span>Abuela Cuca</button>
     <button class="tab-btn" data-tab="jesus"><span class="tab-dot"></span>Abuelo Jesus</button>
   </div>
@@ -806,7 +826,7 @@
 <div class="wrap">
 
   <!-- TAB 1: RESUMEN SEMANAL -->
-  <div class="tab-panel active" id="tab-resumen">
+  <div class="tab-panel" id="tab-resumen">
 
     <div class="main-split">
       <div class="split-left">
@@ -824,27 +844,12 @@
     </section>
         </div>
         <div class="blk-status">
-    <section id="bracket-section">
+    <section id="status-section">
       <div class="section-head">
-        <h2>Bracket de Playoffs</h2>
-        <span class="note">Top 2 de cada liga = bye · los siguientes 8 mejores de la tabla general completan playoffs</span>
+        <h2>Camino a Playoffs</h2>
+        <span class="note" id="status-note"></span>
       </div>
-      <div class="bracket-panel">
-        <div class="bracket-scroll">
-          <div class="bracket" id="bracket"></div>
-        </div>
-      </div>
-    </section>
-    <section>
-      <div class="section-head">
-        <h2>🍠 El Camote Bowl</h2>
-        <span class="note">Los que no llegaron a playoffs se lo juegan entre ellos — nadie se salva de la vergüenza familiar</span>
-      </div>
-      <div class="bracket-panel camote-theme">
-        <div class="bracket-scroll">
-          <div class="bracket" id="camote-bracket"></div>
-        </div>
-      </div>
+      <div class="status-cols" id="status-cols"></div>
     </section>
         </div>
         <div class="blk-table">
@@ -880,12 +885,12 @@
             <span class="note games-legend"><span class="lg-dot lg-cardinal"></span>Abuela Cuca <span class="lg-dot lg-slate"></span>Abuelo Jesus</span>
           </div>
           <div class="games-group">
-            <h3 class="group-title" id="results-title">Resultados</h3>
-            <div id="results-games"></div>
+            <h3 class="group-title" id="next-title">Próximos Juegos</h3>
+            <div id="next-games"></div>
           </div>
           <div class="games-group">
-            <h3 class="group-title" id="upcoming-title">Próximos Juegos</h3>
-            <div id="upcoming-games"></div>
+            <h3 class="group-title" id="results-title">Resultados</h3>
+            <div id="results-games"></div>
           </div>
         </div>
       </div>
@@ -894,25 +899,84 @@
   </div>
 
   <!-- TAB 2: ABUELA CUCA -->
+  <!-- TAB: CLASIFICACIÓN EN VIVO -->
+  <div class="tab-panel active" id="tab-vivo">
+    <div class="main-split vivo-split">
+      <div class="split-left">
+        <div class="blk-table">
+          <section>
+            <div class="section-head">
+              <h2>Clasificación en Vivo</h2>
+              <span class="note">Se ajusta con los marcadores de Sleeper</span>
+            </div>
+            <div id="lv-bar"></div>
+            <div class="ledger">
+              <table>
+                <thead><tr><th>Rank</th><th>Equipo</th><th>Liga</th><th class="num">Record</th><th class="num">Pts</th><th class="num">Prob.</th></tr></thead>
+                <tbody id="lv-body"></tbody>
+              </table>
+              <div class="ledger-legend" id="lv-legend"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="split-right">
+        <div class="blk-games">
+          <div class="section-head">
+            <h2 id="lv-games-title">Partidos</h2>
+            <span class="note games-legend"><span class="lg-dot lg-cardinal"></span>Abuela Cuca <span class="lg-dot lg-slate"></span>Abuelo Jesus</span>
+          </div>
+          <div id="lv-games"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PRÓXIMOS JUEGOS -->
+  <div class="tab-panel" id="tab-proximos">
+    <section>
+      <div class="section-head">
+        <h2 id="upcoming-title">Próximos Juegos</h2>
+        <span class="note">Cruces Cuca vs Jesus · sorteo fijo · cuentan para la tabla</span>
+      </div>
+      <div id="upcoming-games"></div>
+    </section>
+  </div>
+
+  <!-- TAB: PLAYOFFS & CAMOTE BOWL -->
+  <div class="tab-panel" id="tab-camote">
+    <section id="bracket-section">
+        <div class="section-head">
+          <h2>Bracket de Playoffs</h2>
+          <span class="note">Los 8 mejores de la tabla general (ambas ligas) · desde la semana 15 · un solo juego por ronda</span>
+        </div>
+        <div class="bracket-panel">
+          <div class="bracket-scroll">
+            <div class="bracket" id="bracket"></div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="section-head">
+          <h2>🍠 El Camote Bowl</h2>
+          <span class="note">Los últimos 8 de la tabla se lo juegan entre ellos · pierde = avanza · nadie se salva de la vergüenza familiar</span>
+        </div>
+        <div class="bracket-panel camote-theme">
+          <div class="bracket-scroll">
+            <div class="bracket" id="camote-bracket"></div>
+          </div>
+        </div>
+      </section>
+  </div>
+
   <div class="tab-panel" id="tab-cuca">
     <div class="headline-row" id="cuca-headline"></div>
     <section>
       <div class="section-head">
         <h2 id="cuca-title">Abuela Cuca</h2>
-        <span class="note">Playoff picture — top 6 clasifican, top 2 con bye en Ronda 1 (formato propio de esta liga)</span>
+        <span class="note">Posiciones de la liga · pasan a playoffs los 8 mejores de la tabla general (ambas ligas)</span>
       </div>
       <div class="league-panel" id="cuca-panel"></div>
-    </section>
-    <section>
-      <div class="section-head">
-        <h2>Bracket de Playoffs — Abuela Cuca</h2>
-        <span class="note">Independiente del bracket general — solo equipos de esta liga</span>
-      </div>
-      <div class="bracket-panel">
-        <div class="bracket-scroll">
-          <div class="bracket" id="cuca-bracket"></div>
-        </div>
-      </div>
     </section>
   </div>
 
@@ -922,20 +986,9 @@
     <section>
       <div class="section-head">
         <h2 id="jesus-title">Abuelo Jesus</h2>
-        <span class="note">Playoff picture — top 6 clasifican, top 2 con bye en Ronda 1 (formato propio de esta liga)</span>
+        <span class="note">Posiciones de la liga · pasan a playoffs los 8 mejores de la tabla general (ambas ligas)</span>
       </div>
       <div class="league-panel" id="jesus-panel"></div>
-    </section>
-    <section>
-      <div class="section-head">
-        <h2>Bracket de Playoffs — Abuelo Jesus</h2>
-        <span class="note">Independiente del bracket general — solo equipos de esta liga</span>
-      </div>
-      <div class="bracket-panel">
-        <div class="bracket-scroll">
-          <div class="bracket" id="jesus-bracket"></div>
-        </div>
-      </div>
     </section>
   </div>
 
@@ -1018,15 +1071,7 @@ function sortTeams(teams){
 const TOTAL_PLAYOFF_SPOTS = 12;
 const teamKey = t => `${t.tag}|${t.name}`;
 
-// Each conference also runs its OWN independent playoff — separate bracket,
-// separate cutoff line, nothing to do with the general/combined one above.
-const CONF_PLAYOFF_SPOTS = 6;
-const CONF_BYE_SPOTS = 2;
-function confPlayoffStatus(localIndex){
-  if (localIndex < CONF_BYE_SPOTS) return { key: 'bye', label: 'Bye · Ronda 1' };
-  if (localIndex < CONF_PLAYOFF_SPOTS) return { key: 'playoff', label: 'Playoffs' };
-  return { key: 'out', label: '🍠 Camote Bowl' };
-}
+// Ya no hay conferencias ni byes: pasan los 8 mejores de la tabla general (ambas ligas).
 
 // Walks a pool that's already sorted by the general table and pulls out the
 // first `byesPerLeague` teams encountered per league — since the general sort
@@ -1055,13 +1100,12 @@ const combined = [
 ];
 const rankedCombined = sortTeams(combined).map((t, i) => ({...t, overallRank: i + 1}));
 
-const mainSplit = splitByeAndField(rankedCombined, 2);        // 4 conference byes + 18 remaining
+const mainSplit = splitByeAndField(rankedCombined, 0);        // sin byes: entran los 8 mejores de la tabla general
 const wildcardTeams = mainSplit.field.slice(0, 8);             // best 8 of the rest, general order
-const campoteCandidates = mainSplit.field.slice(8);            // the 10 that miss playoffs
+const campoteCandidates = mainSplit.field.slice(8);            // los 14 que no entran a playoffs (el Camote Bowl usa los últimos 8)
 
-mainSplit.byes.forEach(t => { t.statusKey = 'bye'; t.statusLabel = 'Bye · Ronda 1'; });
 wildcardTeams.forEach(t => { t.statusKey = 'playoff'; t.statusLabel = 'Playoffs'; });
-campoteCandidates.forEach(t => { t.statusKey = 'out'; t.statusLabel = '🍠 Camote Bowl'; });
+campoteCandidates.forEach((t, i) => { t.statusKey = 'out'; t.statusLabel = i >= campoteCandidates.length - 8 ? '🍠 Camote Bowl' : 'Fuera'; });
 
 // (statusByTeam removed — each conference table now uses its own local playoff status)
 
@@ -1073,32 +1117,29 @@ function renderLeagueTab(league, panelId, headlineId, titleId, bracketId, champL
   panel.style.setProperty('--panel-color', `var(--${league.color})`);
 
   const rows = sorted.map((t,i) => {
-    const status = confPlayoffStatus(i);
-    const cutoff = (i === CONF_PLAYOFF_SPOTS)
-      ? `<tr class="cutoff-row"><td colspan="5">— línea de playoff (de esta conferencia) —</td></tr>` : '';
-    return `${cutoff}
+    const g = rankedCombined.find(x => x.name === t.name);
+    return `
       <tr>
         <td class="num rank-num">${i+1}</td>
         <td>${t.name}</td>
-        <td class="num">${t.bye ? '1-0' : `${t.wins}-${t.losses}`}</td>
+        <td class="num">${t.wins}-${t.losses}</td>
         <td class="num">${t.pointsFor.toFixed(1)}</td>
-        <td><span class="status-badge st-${status.key}">${status.label}</span></td>
+        <td class="num">${g.overallRank}</td>
+        <td><span class="status-badge st-${g.statusKey}">${g.statusLabel}</span></td>
       </tr>`;
   }).join('');
 
   panel.innerHTML = `
-    <h3><span class="dot"></span>${league.name} — Playoff Picture</h3>
+    <h3><span class="dot"></span>${league.name} — Posiciones</h3>
     <table>
-      <thead><tr><th></th><th>Equipo</th><th class="num">G-P</th><th class="num">PF</th><th>Estado</th></tr></thead>
+      <thead><tr><th></th><th>Equipo</th><th class="num">G-P</th><th class="num">PF</th><th class="num">Gral.</th><th>Estado</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
   `;
 
   const leader = sorted[0];
   const topScorer = [...league.teams].sort((a,b)=>b.pointsFor-a.pointsFor)[0];
-  const cutoffLeader = sorted[CONF_PLAYOFF_SPOTS - 1]; // last team IN, this conference
-  const cutoffChaser = sorted[CONF_PLAYOFF_SPOTS];     // first team OUT, this conference
-  const cutoffGap = cutoffLeader.pointsFor - cutoffChaser.pointsFor;
+  const inTop8 = league.teams.filter(t => (rankedCombined.find(x => x.name === t.name) || {}).overallRank <= 8).length;
   const headline = document.getElementById(headlineId);
   headline.innerHTML = `
     <div class="stat-card" style="--panel-color:var(--${league.color})">
@@ -1110,12 +1151,11 @@ function renderLeagueTab(league, panelId, headlineId, titleId, bracketId, champL
       <div class="value">${topScorer.name}</div>
     </div>
     <div class="stat-card" style="--panel-color:var(--${league.color})">
-      <div class="label">Distancia al corte (6° vs 7°)</div>
-      <div class="value">${cutoffGap >= 0 ? '+' : ''}${cutoffGap.toFixed(1)} pts</div>
+      <div class="label">En el top 8 general</div>
+      <div class="value">${inTop8} de ${league.teams.length}</div>
     </div>
   `;
 
-  buildConferenceBracket(league, sorted, bracketId, champLabel);
   return sorted; // handed back so the recap section can still order by this league's own record
 }
 
@@ -1262,11 +1302,11 @@ rankingsBody.innerHTML = rankedCombined.map((t) => {
     <td class="num">${t.bye ? 'BYE' : `${t.wins}-${t.losses}`}</td>
     <td class="num ${sCls}">${s}</td>
     <td class="num">${t.pointsFor.toFixed(1)}</td>
-    <td class="num prob-c">${preProb[t.name] ? preProb[t.name][0] + '%' : '—'}</td>
+    <td class="num prob-c" data-team="${t.name}">—</td>
   </tr>`;
 }).join('');
 document.getElementById('rankings-legend').innerHTML =
-  `<span class="swatch"></span> = equipo en playoffs (bye o clasificado) según la tabla general · ▲▼ = lugares que subió o bajó vs. semana ${prevSnapshot.week} · Prob. = % de probabilidad de entrar a playoffs antes de la última semana (simulación)`;
+  `<span class="swatch"></span> = equipo en zona de playoffs (top 8) según la tabla general · ▲▼ = lugares que subió o bajó vs. semana ${prevSnapshot.week} · Prob. = probabilidad simulada de entrar al top 8 (playoffs desde la semana 15)`;
 
 // ---- Bloques: más lugares perdidos (izquierda) y más lugares ganados (derecha) ----
 // Se calculan solos a partir del movimiento en la tabla general; si hay empate, salen todos.
@@ -1362,9 +1402,29 @@ function renderGamesSection(containerId, data, mode, expectedWeek, pendingMsg){
 }
 
 document.getElementById('results-title').textContent = `Resultados · Semana ${currentWeek}`;
-document.getElementById('upcoming-title').textContent = `Próximos Juegos · Semana ${currentWeek + 1}`;
+document.getElementById('upcoming-title').textContent = 'Próximos Juegos';
 renderGamesSection('results-games', resultsMatchups, 'results', currentWeek, 'Resultados por publicar.');
-renderGamesSection('upcoming-games', upcomingMatchups, 'upcoming', currentWeek + 1, 'Los cruces de esta semana se publican en cuanto estén listos.');
+// Semanas 12–14: juegos cruzados Cuca vs Jesus, sorteados una sola vez (cuentan para la tabla)
+const crossSchedule = {"12": [["Los Rifles 2.0", "SanPancho85"], ["jesusarias97", "Steel Armonico"], ["Dr Pat", "Luisramon98"], ["SteelersLaguna", "pablogutig"], ["Pending Wiki", "THE BOYZ"], ["CacaLoapanPushers", "Peor Pesadilla"], ["Color Esperanza", "TEPOS"], ["Galacticos", "Martha"], ["Beard of Steel", "RODCKERS"], ["Real Bañil", "Los Marrones"], ["Capitan JC", "DanielAD85"]], "13": [["Los Rifles 2.0", "Steel Armonico"], ["jesusarias97", "Luisramon98"], ["Dr Pat", "pablogutig"], ["SteelersLaguna", "THE BOYZ"], ["Pending Wiki", "Peor Pesadilla"], ["CacaLoapanPushers", "TEPOS"], ["Color Esperanza", "Martha"], ["Galacticos", "RODCKERS"], ["Beard of Steel", "Los Marrones"], ["Real Bañil", "DanielAD85"], ["Capitan JC", "SanPancho85"]], "14": [["Los Rifles 2.0", "Luisramon98"], ["jesusarias97", "pablogutig"], ["Dr Pat", "THE BOYZ"], ["SteelersLaguna", "Peor Pesadilla"], ["Pending Wiki", "TEPOS"], ["CacaLoapanPushers", "Martha"], ["Color Esperanza", "RODCKERS"], ["Galacticos", "Los Marrones"], ["Beard of Steel", "DanielAD85"], ["Real Bañil", "SanPancho85"], ["Capitan JC", "Steel Armonico"]]};
+(function(){
+  const el = document.getElementById('upcoming-games');
+  const dot = c => `<span class="lg-dot lg-${c}"></span>`;
+  const rec = n => { const t = teamByName[n]; return t ? `<small>${t.wins}-${t.losses}</small>` : ''; };
+  const nextEl = document.getElementById('next-games'), nw = currentWeek + 1;
+  if (nextEl) {
+    document.getElementById('next-title').textContent = `Próximos Juegos · Semana ${nw}`;
+    nextEl.innerHTML = crossSchedule[nw] ? '<div class="games-2col xg">' + crossSchedule[nw].map(([c, j]) => `
+      <div class="game"><div class="game-row"><span class="gname">${dot('cardinal')}${c}${rec(c)}</span></div>
+      <div class="game-row"><span class="gname">${dot('slate')}${j}${rec(j)}</span></div></div>`).join('') + '</div>' : '<div class="games-pending">Cruces por publicar.</div>';
+  }
+  const weeks = Object.keys(crossSchedule).map(Number).filter(w => w > currentWeek).sort((a,b) => a - b);
+  if (!weeks.length) { el.innerHTML = '<div class="games-pending">Temporada cruzada terminada.</div>'; return; }
+  el.innerHTML = '<div class="xweeks">' + weeks.map(w => `
+    <div class="xweek"><div class="games-col-title xw"><span>Semana ${w}</span></div>
+    <div class="xg">` + crossSchedule[w].map(([c, j]) => `
+      <div class="game"><div class="game-row"><span class="gname">${dot('cardinal')}${c}${rec(c)}</span></div>
+      <div class="game-row"><span class="gname">${dot('slate')}${j}${rec(j)}</span></div></div>`).join('') + `</div></div>`).join('') + '</div>';
+})();
 
 // ---- Golpe de Realidad: highlight manual, negativo (edítalo cada semana) ----
 const realityCheck = {
@@ -1602,62 +1662,66 @@ camoteChampBlock.innerHTML = `
 camoteBracketEl.appendChild(camoteChampBlock);
 
 // ---- Camino a Playoffs: PlayOffs / In The Hunt / Eliminated ----
-// Se calcula solo. Considera TODOS los resultados posibles de los juegos que faltan (próxima semana) y
-// aplica la misma regla del bracket general: 2 mejores de cada liga (bye) + 8 mejores del resto.
-// Desempate por puntos acumulados; como los puntos de los juegos que faltan son desconocidos, se usa
-// el rango real de la temporada (50–185 pts) de forma conservadora.
-const SEASON_WEEKS = 11; // semanas de temporada regular
+// Playoffs empiezan en la semana 15 con los 8 mejores de la tabla general (récord, luego puntos).
+// Quedan los juegos cruzados Cuca vs Jesus de las semanas 12–14 (crossSchedule).
+//  · PlayOffs  = ya no pueden quedar fuera (aun perdiendo todo, menos de 8 equipos los pueden superar).
+//  · Eliminated = aun ganando todo, 8 o más equipos ya tienen más victorias.
+//  · In The Hunt = el resto, con probabilidad simulada (20,000 escenarios con el calendario sorteado).
+const SEASON_WEEKS = 14; // última semana de temporada regular (cuenta para la tabla)
 (function(){
   const section = document.getElementById('status-section');
   if (!section) return;
-  if (currentWeek < SEASON_WEEKS - 1) { section.style.display = 'none'; return; }
-  const remaining = (currentWeek < SEASON_WEEKS && upcomingMatchups.week === currentWeek + 1)
-    ? [...upcomingMatchups.cuca, ...upcomingMatchups.jesus] : [];
-  const realGames = remaining.filter(([a, b]) => a !== 'BYE' && b !== 'BYE');
-  const byeWins = remaining.filter(([a, b]) => a === 'BYE' || b === 'BYE').map(([a, b]) => a === 'BYE' ? b : a);
+  if (currentWeek >= SEASON_WEEKS) {
+    section.style.display = 'none';
+    document.querySelectorAll('#rankings-body td.prob-c').forEach(td => { const t = rankedCombined.find(x => x.name === td.dataset.team); td.textContent = t && t.overallRank <= 8 ? '100%' : '0%'; });
+    return;
+  }
+  const R = SEASON_WEEKS - currentWeek;
+  const games = [];
+  Object.keys(crossSchedule).map(Number).filter(w => w > currentWeek).sort((a,b)=>a-b)
+    .forEach(w => crossSchedule[w].forEach(([a,b]) => games.push([a,b])));
   const names = combined.map(t => t.name);
-  const tagOf = Object.fromEntries(combined.map(t => [t.name, t.tag]));
-  const baseW = Object.fromEntries(combined.map(t => [t.name, t.wins]));
-  const basePF = Object.fromEntries(combined.map(t => [t.name, t.pointsFor]));
-  const LO = remaining.length ? 50 : 0, HI = remaining.length ? 185 : 0;
-
-  function qualify(w, pf){
-    const order = [...names].sort((x, y) => w[y] - w[x] || pf[y] - pf[x]);
-    const cnt = {}, byes = [];
-    order.forEach(n => {
-      cnt[tagOf[n]] = cnt[tagOf[n]] || 0;
-      if (cnt[tagOf[n]] < 2) { cnt[tagOf[n]]++; byes.push(n); }
+  const idx = Object.fromEntries(names.map((n,i) => [n,i]));
+  const W0 = names.map(n => combined.find(t => t.name === n).wins);
+  const PF0 = names.map(n => combined.find(t => t.name === n).pointsFor);
+  const G = Math.max(1, currentWeek);
+  const MU = PF0.map(v => v / G), SD = 22;
+  // cotas seguras
+  const maxW = W0.map(w => w + R);
+  const eliminated = names.map((n,i) => W0.filter((w,j) => j !== i && w > maxW[i]).length >= 8);
+  const clinched = names.map((n,i) => maxW.filter((m,j) => j !== i && m >= W0[i]).length <= 7);
+  // simulación (semilla fija: los porcentajes no cambian al recargar)
+  let seed = 20261124;
+  const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const gauss = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+  const N = 20000, hits = new Array(names.length).fill(0);
+  const gi = games.map(([a,b]) => [idx[a], idx[b]]);
+  for (let s = 0; s < N; s++) {
+    const w = W0.slice(), pf = PF0.slice();
+    gi.forEach(([a,b]) => {
+      const sa = MU[a] + SD * gauss(), sb = MU[b] + SD * gauss();
+      pf[a] += sa; pf[b] += sb; if (sa > sb) w[a]++; else w[b]++;
     });
-    const field = order.filter(n => !byes.includes(n));
-    return { q: new Set([...byes, ...field.slice(0, 8)]), by: new Set(byes) };
+    const order = names.map((_, i) => i).sort((x, y) => w[y] - w[x] || pf[y] - pf[x]);
+    for (let k = 0; k < 8; k++) hits[order[k]]++;
   }
-
-  const clinched = Object.fromEntries(names.map(n => [n, true]));
-  const byeClinched = Object.fromEntries(names.map(n => [n, true]));
-  const alive = Object.fromEntries(names.map(n => [n, false]));
-  for (let mask = 0; mask < (1 << realGames.length); mask++){
-    const w = {...baseW};
-    byeWins.forEach(n => { w[n]++; });
-    realGames.forEach(([a, b], k) => { w[(mask >> k) & 1 ? b : a]++; });
-    names.forEach(T => {
-      const worst = {}, best = {};
-      names.forEach(n => { worst[n] = basePF[n] + (n === T ? LO : HI); best[n] = basePF[n] + (n === T ? HI : LO); });
-      const pess = qualify(w, worst);
-      if (!pess.q.has(T)) clinched[T] = false;
-      if (!pess.by.has(T)) byeClinched[T] = false;
-      if (qualify(w, best).q.has(T)) alive[T] = true;
-    });
-  }
-
-  const inList = rankedCombined.filter(t => clinched[t.name]);
-  const huntList = rankedCombined.filter(t => !clinched[t.name] && alive[t.name]);
-  const outList = rankedCombined.filter(t => !alive[t.name]);
-  const byeNow = new Set(mainSplit.byes.map(t => t.name)); // top 2 de cada liga hoy
+  const prob = hits.map(h => h / N);
+  const pctTxt = p => p < 0.005 ? '<1%' : Math.min(99, Math.round(p * 100)) + '%'; // sin decimales; 99% máx. mientras no esté matemáticamente asegurado
+  const byName = n => rankedCombined.find(t => t.name === n);
+  // columna Prob. de la Clasificación Combinada
+  document.querySelectorAll('#rankings-body td.prob-c').forEach(td => {
+    const i = idx[td.dataset.team];
+    td.textContent = clinched[i] ? '100%' : eliminated[i] ? '0%' : pctTxt(prob[i]);
+  });
+  const inList = rankedCombined.filter(t => clinched[idx[t.name]]);
+  const outList = rankedCombined.filter(t => eliminated[idx[t.name]]);
+  const huntList = rankedCombined.filter(t => !clinched[idx[t.name]] && !eliminated[idx[t.name]])
+    .sort((x, y) => prob[idx[y.name]] - prob[idx[x.name]] || x.overallRank - y.overallRank);
   const rowHTML = (t, chip) => `
     <div class="status-row">
       <span class="lg-dot lg-${t.tag}"></span>
       <span class="nm">${t.name}</span>
-      ${chip ? '<span class="status-bye">BYE</span>' : ''}
+      ${chip ? `<span class="status-pct">${chip}</span>` : ''}
       <span class="rec">${t.wins}-${t.losses}</span>
     </div>`;
   const colHTML = (cls, title, sub, list, chipFn, emptyMsg) => `
@@ -1667,12 +1731,11 @@ const SEASON_WEEKS = 11; // semanas de temporada regular
       ${list.length ? list.map(t => rowHTML(t, chipFn && chipFn(t))).join('') : `<div class="status-empty">${emptyMsg}</div>`}
     </div>`;
   document.getElementById('status-cols').innerHTML =
-    colHTML('sc-in', '🏆 PlayOffs', 'Lugar asegurado en el bracket general', inList, t => byeNow.has(t.name), 'Todavía nadie.') +
-    colHTML('sc-hunt', '🎯 In The Hunt', 'Todavía pueden entrar', huntList, t => byeNow.has(t.name), 'Nadie.') +
-    colHTML('sc-out', '🍠 Eliminated', 'Ya no alcanzan · Camote Bowl', outList, t => byeNow.has(t.name), 'Nadie.');
-  document.getElementById('status-note').textContent = remaining.length
-    ? `Queda 1 juego (semana ${currentWeek + 1}) · BYE = top 2 de cada liga hoy (bye en primera ronda)`
-    : 'Temporada regular terminada · BYE = top 2 de cada liga (bye en primera ronda)';
+    colHTML('sc-in', '🏆 PlayOffs', 'Lugar asegurado en el top 8', inList, null, 'Todavía nadie.') +
+    colHTML('sc-hunt', '🎯 In The Hunt', 'Todavía pueden entrar · % simulado', huntList, t => pctTxt(prob[idx[t.name]]), 'Nadie.') +
+    colHTML('sc-out', '🍠 Eliminated', 'Ya no alcanzan', outList, null, 'Nadie.');
+  document.getElementById('status-note').textContent =
+    `Quedan ${R} semana${R > 1 ? 's' : ''} de juegos cruzados (S${currentWeek + 1}–S${SEASON_WEEKS}) · playoffs desde la semana 15, top 8 de la tabla general`;
 })();
 
 // ---- Tab switching ----
@@ -1706,55 +1769,29 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   // ---------- Definición de los dos cuadros ----------
-  const byes = [...mainSplit.byes].sort((a,b) => a.overallRank - b.overallRank);
-  const wc = wildcardTeams;
-  const cam = campoteCandidates;
-  const WK_R1 = [12,13], WK_QF = [14], WK_SF = [15], WK_F = [16];
+  const seeds = wildcardTeams;                    // top 8 de la tabla general, en orden
+  const cam = campoteCandidates.slice(-8);        // últimos 8 de la tabla (mejor a peor)
+  const WK_QF = [15], WK_SF = [16], WK_F = [17];
   const ref = (id, take, label) => ({ ref:id, take, label });
-
-  const PLAY = {
-    mode:'win',
+  const build = (t, take, word, mode, champ) => ({
+    mode,
     rounds:[
-      { label:'Ronda 1 · Wild Card', sub:'S12–13 · ida y vuelta', nodes:[
-        { id:'p1', a:wc[0], b:wc[7], weeks:WK_R1 },
-        { id:'p2', a:wc[3], b:wc[4], weeks:WK_R1 },
-        { id:'p3', a:wc[2], b:wc[5], weeks:WK_R1 },
-        { id:'p4', a:wc[1], b:wc[6], weeks:WK_R1 } ]},
-      { label:'Cuartos de Final', sub:'S14', nodes:[
-        { id:'q1', a:byes[0], b:ref('p2','winner','Ganador Ronda 1 · Partido 2'), weeks:WK_QF },
-        { id:'q2', a:byes[1], b:ref('p3','winner','Ganador Ronda 1 · Partido 3'), weeks:WK_QF },
-        { id:'q3', a:byes[2], b:ref('p4','winner','Ganador Ronda 1 · Partido 4'), weeks:WK_QF },
-        { id:'q4', a:byes[3], b:ref('p1','winner','Ganador Ronda 1 · Partido 1'), weeks:WK_QF } ]},
-      { label:'Semifinal', sub:'S15', nodes:[
-        { id:'s1', a:ref('q1','winner','Ganador Cuartos · Partido 1'), b:ref('q2','winner','Ganador Cuartos · Partido 2'), weeks:WK_SF },
-        { id:'s2', a:ref('q3','winner','Ganador Cuartos · Partido 3'), b:ref('q4','winner','Ganador Cuartos · Partido 4'), weeks:WK_SF } ]},
-      { label:'Final', sub:'S16', final:true, nodes:[
-        { id:'f', a:ref('s1','winner','Ganador Semifinal 1'), b:ref('s2','winner','Ganador Semifinal 2'), weeks:WK_F } ]},
+      { label:'Cuartos de Final', sub:'S15 · un juego', nodes:[
+        { id:'q1', a:t[0], b:t[7], weeks:WK_QF }, { id:'q2', a:t[3], b:t[4], weeks:WK_QF },
+        { id:'q3', a:t[2], b:t[5], weeks:WK_QF }, { id:'q4', a:t[1], b:t[6], weeks:WK_QF } ]},
+      { label:'Semifinal', sub:'S16 · un juego', nodes:[
+        { id:'s1', a:ref('q1',take,word+' Cuartos · Partido 1'), b:ref('q2',take,word+' Cuartos · Partido 2'), weeks:WK_SF },
+        { id:'s2', a:ref('q3',take,word+' Cuartos · Partido 3'), b:ref('q4',take,word+' Cuartos · Partido 4'), weeks:WK_SF } ]},
+      { label:'Final', sub:'S17 · un juego', final:true, nodes:[
+        { id:'f', a:ref('s1',take,word+' Semifinal 1'), b:ref('s2',take,word+' Semifinal 2'), weeks:WK_F } ]},
     ],
-    champ:{ icon:'🏆', label:'Campeon', node:'f', take:'winner', empty:'Por definir' }
-  };
-  const CAMO = {
-    mode:'lose',
-    rounds:[
-      { label:'Ronda de Salvación', sub:'S12–13 · ida y vuelta', nodes:[
-        { id:'c1', a:cam[0], b:cam[3], weeks:WK_R1, mode:'win' },
-        { id:'c2', a:cam[1], b:cam[2], weeks:WK_R1, mode:'win' } ]},
-      { label:'Ronda 1', sub:'S14', nodes:[
-        { id:'r1', a:ref('c1','loser','Perdedor Salvación A'), b:cam[9], weeks:WK_QF },
-        { id:'r2', a:cam[6], b:cam[7], weeks:WK_QF },
-        { id:'r3', a:ref('c2','loser','Perdedor Salvación B'), b:cam[8], weeks:WK_QF },
-        { id:'r4', a:cam[4], b:cam[5], weeks:WK_QF } ]},
-      { label:'Semifinal', sub:'S15', nodes:[
-        { id:'t1', a:ref('r1','loser','Perdedor Ronda 1 · Partido 1'), b:ref('r2','loser','Perdedor Ronda 1 · Partido 2'), weeks:WK_SF },
-        { id:'t2', a:ref('r3','loser','Perdedor Ronda 1 · Partido 3'), b:ref('r4','loser','Perdedor Ronda 1 · Partido 4'), weeks:WK_SF } ]},
-      { label:'Final', sub:'S16', final:true, nodes:[
-        { id:'cf', a:ref('t1','loser','Perdedor Semifinal 1'), b:ref('t2','loser','Perdedor Semifinal 2'), weeks:WK_F } ]},
-    ],
-    champ:{ icon:'🍠', label:'El Camote Mayor', node:'cf', take:'loser', empty:'Quien PIERDA la final' }
-  };
+    champ
+  });
+  const PLAY = build(seeds, 'winner', 'Ganador', 'win', { icon:'🏆', label:'Campeon', node:'f', take:'winner', empty:'Por definir' });
+  const CAMO = build(cam, 'loser', 'Perdedor', 'lose', { icon:'🍠', label:'El Camote Mayor', node:'f', take:'loser', empty:'Quien PIERDA la final' });
 
   // ---------- Estado en vivo ----------
-  const live = { ok:false, nflWeek:null, scores:{}, proj:{}, rosters:{}, players:null, unmatched:[], msg:'Conectando con Sleeper…', at:null };
+  const live = { ok:false, nflWeek:null, scores:{}, proj:{}, rosters:{}, players:null, unmatched:[], msg:'Los marcadores de Sleeper aparecerán aquí desde la semana 15', at:null };
   const weekDone = w => live.nflWeek != null && live.nflWeek > w;
 
   function cell(name, w){ return ((live.scores[name]||{})[w]) || null; }
@@ -1963,8 +2000,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       const st = await jget(`${SLEEPER}/state/nfl`);
       live.nflWeek = (st.season_type === 'post' || st.season_type === 'off') ? 99 : st.week;
       const m = await loadMeta();
-      const pw = [...WK_R1, ...WK_QF, ...WK_SF, ...WK_F];
-      const weeks = [...new Set([...pw.filter(w => w <= live.nflWeek), ...(live.nflWeek >= 1 && live.nflWeek <= 18 ? [live.nflWeek] : [16])])];
+      const pw = [12, 13, 14, ...WK_QF, ...WK_SF, ...WK_F];
+      const weeks = [...new Set([...pw.filter(w => w <= live.nflWeek), ...(live.nflWeek >= 1 && live.nflWeek <= 18 ? [live.nflWeek] : [17])])];
       const rosters = {};
       const scores = {};
       for (const lg of m) {
@@ -1987,12 +2024,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         }
       }
       live.scores = scores; live.rosters = rosters; live.ok = true; live.at = new Date();
-      live.msg = live.nflWeek === 99 ? 'Temporada terminada' : (live.nflWeek < 12 ? `En vivo · conectado a Sleeper (semana ${live.nflWeek}; playoffs inician en la semana 12)` : `En vivo · semana ${live.nflWeek}`);
+      live.msg = live.nflWeek === 99 ? 'Temporada terminada' : (live.nflWeek < 12 ? `En vivo · conectado a Sleeper (semana ${live.nflWeek}; playoffs inician en la semana 15)` : `En vivo · semana ${live.nflWeek}`);
     } catch (e) {
-      live.msg = live.ok ? 'No se pudo actualizar; mostrando el último dato' : 'Esperando datos de Sleeper…';
+      live.msg = live.ok ? 'No se pudo actualizar; mostrando el último dato' : 'Los marcadores de Sleeper aparecerán aquí desde la semana 15';
       if (window.console) console.warn('[live]', e);
     }
     paint();
+    (window.__onLive || []).forEach(f => { try { f(live); } catch (e) { if (window.console) console.warn('[live-tab]', e); } });
   }
 
 
@@ -2048,7 +2086,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       <div class="rbody">${body}</div></div>`;
   }
   document.addEventListener('click', e => {
-    const s = e.target.closest('.slot[data-team]'); if (s) return openRoster(s.dataset.team);
+    const s = e.target.closest('.slot[data-team], .game-row[data-team]'); if (s) return openRoster(s.dataset.team);
     const td = e.target.closest('#rankings-body td:nth-child(2)'); if (td && T(td.textContent.trim())) openRoster(td.textContent.trim());
   });
 
@@ -2095,6 +2133,137 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   setInterval(() => { if (!document.hidden) refresh(); }, REFRESH_MS);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
   window.__live = { live, refresh, paint, PLAY, CAMO, resolveAll };
+})();
+
+</script>
+<script>
+
+/* =========================================================
+   CLASIFICACIÓN EN VIVO — se recalcula con cada actualización de Sleeper
+   ========================================================= */
+(function(){
+  const CW = [12, 13, 14];
+  const SEASON = 14;
+  const base = rankedCombined.map(t => ({ name: t.name, tag: t.tag, league: t.league, w: t.wins, l: t.losses, pf: t.pointsFor, rank: t.overallRank }));
+  const idx = Object.fromEntries(base.map((t, i) => [t.name, i]));
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function run(L){
+    const ok = !!(L && L.ok);
+    const done = w => ok && L.nflWeek > w;
+    const cell = (n, w) => (ok && L.scores[n] && L.scores[n][w]) || null;
+    const n = base.length;
+    // final = solo semanas cerradas; vivo = además juegos en curso (el que va ganando suma victoria provisional)
+    const Wf = base.map(t => t.w), Pf = base.map(t => t.pf);
+    const Wv = base.map(t => t.w), Lv = base.map(t => t.l), Pv = base.map(t => t.pf);
+    const playing = new Set();
+    let lastDone = 11;
+    CW.forEach(w => (crossSchedule[w] || []).forEach(([a, b]) => {
+      const ca = cell(a, w), cb = cell(b, w); if (!ca || !cb || ca.pts == null || cb.pts == null) return;
+      const ia = idx[a], ib = idx[b], fin = done(w);
+      if (!fin && ca.pts + cb.pts <= 0) return;
+      Pv[ia] += ca.pts; Pv[ib] += cb.pts;
+      const aw = ca.pts === cb.pts ? base[ia].rank < base[ib].rank : ca.pts > cb.pts;
+      Wv[aw ? ia : ib]++; Lv[aw ? ib : ia]++;
+      if (fin) { Pf[ia] += ca.pts; Pf[ib] += cb.pts; Wf[aw ? ia : ib]++; }
+      else { playing.add(a); playing.add(b); }
+    }));
+    CW.forEach(w => { if (done(w)) lastDone = w; });
+    // tabla viva
+    const order = base.map((_, i) => i).sort((x, y) => (Wv[y] / Math.max(1, Wv[y] + Lv[y])) - (Wv[x] / Math.max(1, Wv[x] + Lv[x])) || Pv[y] - Pv[x]);
+    // estatus y probabilidad (semanas cerradas = definitivas; la semana en curso y las que faltan se simulan)
+    const R = SEASON - lastDone;
+    const games = [];
+    CW.filter(w => w > lastDone).forEach(w => (crossSchedule[w] || []).forEach(([a, b]) => games.push([idx[a], idx[b]])));
+    const maxW = Wf.map(w => w + R);
+    const elim = Wf.map((w, i) => Wf.filter((x, j) => j !== i && x > maxW[i]).length >= 8);
+    const clin = Wf.map((w, i) => maxW.filter((m, j) => j !== i && m >= Wf[i]).length <= 7);
+    let seed = 20261124;
+    const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+    const gauss = () => Math.sqrt(-2 * Math.log(1 - rnd())) * Math.cos(2 * Math.PI * rnd());
+    const MU = Pf.map(v => v / (11 + (lastDone - 11))), SD = 22, N = 20000, hits = new Array(n).fill(0);
+    for (let s = 0; s < N; s++) {
+      const w = Wf.slice(), pf = Pf.slice();
+      games.forEach(([a, b]) => { const sa = MU[a] + SD * gauss(), sb = MU[b] + SD * gauss(); pf[a] += sa; pf[b] += sb; if (sa > sb) w[a]++; else w[b]++; });
+      const o = base.map((_, i) => i).sort((x, y) => w[y] - w[x] || pf[y] - pf[x]);
+      for (let k = 0; k < 8; k++) hits[o[k]]++;
+    }
+    const prob = hits.map(h => h / N);
+    return { Wv, Lv, Pv, order, playing, clin, elim, prob, R, lastDone };
+  }
+
+  const pct = p => p < 0.005 ? '<1%' : Math.min(99, Math.round(p * 100)) + '%';
+  const probTxt = (r, i) => r.clin[i] ? '100%' : r.elim[i] ? '0%' : pct(r.prob[i]);
+
+  function renderTable(r, L){
+    const mv = d => d > 0 ? `<div class="mv up">▲${d}</div>` : d < 0 ? `<div class="mv down">▼${-d}</div>` : '<div class="mv same">—</div>';
+    document.getElementById('lv-body').innerHTML = r.order.map((i, pos) => {
+      const t = base[i], rank = pos + 1;
+      return `<tr>
+        <td class="rank-big row-${rank <= 8 ? 'playoff' : 'out'}"><div>${rank}</div>${mv(t.rank - rank)}</td>
+        <td>${esc(t.name)}</td>
+        <td><span class="pill ${t.tag}">${esc(t.league)}</span></td>
+        <td class="num">${r.Wv[i]}-${r.Lv[i]}</td>
+        <td class="num">${r.Pv[i].toFixed(1)}</td>
+        <td class="num prob-c">${probTxt(r, i)}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('lv-legend').innerHTML = '<span class="swatch"></span> = zona de playoffs (top 8) · ▲▼ = lugares vs. la tabla oficial de la semana ' + currentWeek + ' · Prob. = probabilidad simulada de entrar al top 8';
+  }
+
+  function renderStatus(r){
+    const row = (i, chip) => `<div class="status-row"><span class="lg-dot lg-${base[i].tag}"></span><span class="nm">${esc(base[i].name)}</span>${chip ? `<span class="status-pct">${chip}</span>` : ''}<span class="rec">${r.Wv[i]}-${r.Lv[i]}</span></div>`;
+    const col = (cls, title, sub, list, chipFn, empty) => `<div class="status-col ${cls}"><div class="status-title"><span>${title}</span><span class="status-count">${list.length}</span></div><div class="status-sub">${sub}</div>${list.length ? list.map(i => row(i, chipFn && chipFn(i))).join('') : `<div class="status-empty">${empty}</div>`}</div>`;
+    const all = r.order;
+    const inL = all.filter(i => r.clin[i]), outL = all.filter(i => r.elim[i]);
+    const hunt = all.filter(i => !r.clin[i] && !r.elim[i]).sort((a, b) => r.prob[b] - r.prob[a] || base[a].rank - base[b].rank);
+    document.getElementById('lv-status-cols').innerHTML =
+      col('sc-in', '🏆 PlayOffs', 'Lugar asegurado en el top 8', inL, null, 'Todavía nadie.') +
+      col('sc-hunt', '🎯 In The Hunt', 'Todavía pueden entrar · % simulado', hunt, i => pct(r.prob[i]), 'Nadie.') +
+      col('sc-out', '🍠 Eliminated', 'Ya no alcanzan', outL, null, 'Nadie.');
+    document.getElementById('lv-status-note').textContent = r.R > 0
+      ? `Semanas cerradas cuentan como definitivas · quedan ${r.R} semana${r.R > 1 ? 's' : ''} de juegos cruzados · playoffs desde la semana 15`
+      : 'Temporada de juegos cruzados terminada · playoffs desde la semana 15';
+  }
+
+  function renderGames(r, L){
+    const ok = !!(L && L.ok);
+    const nfl = ok ? L.nflWeek : null;
+    const wk = nfl == null || nfl < 12 ? 12 : nfl > 14 ? 14 : nfl;
+    const fin = ok && nfl > wk;
+    const started = ok && CW.includes(wk) && Object.values(L.scores).some(x => x[wk] && x[wk].pts > 0);
+    document.getElementById('lv-games-title').textContent = `Semana ${wk}`;
+    const cell = (n) => (ok && L.scores[n] && L.scores[n][wk]) || null;
+    const side = (name) => {
+      const c = cell(name), pts = c && c.pts != null ? c.pts : null, pj = c && c.proj != null && !fin ? c.proj : null;
+      return { name, pts, pj };
+    };
+    const rowHTML = (x, state) => `<div class="game-row ${state}" data-team="${esc(x.name)}" title="Ver alineación"><span class="gname">${esc(x.name)}${x.pj != null && x.pj > 0 ? `<small class="pj">proy. ${x.pj.toFixed(1)}</small>` : ''}</span><span class="gscore">${x.pts == null ? '—' : x.pts.toFixed(2)}</span></div>`;
+    const lines = (crossSchedule[wk] || []).map(([a, b]) => {
+      const A = side(a), B = side(b);
+      const lead = A.pts != null && B.pts != null && A.pts !== B.pts ? (A.pts > B.pts ? 'a' : 'b') : null;
+      const st = (who) => (!started && !fin) ? '' : (lead === who ? 'win' : lead ? 'lose' : '');
+      return `<div class="game lg-cardinal">${rowHTML(A, st('a'))}${rowHTML(B, st('b'))}</div>`;
+    }).join('');
+    const state = !ok ? 'Sin conexión con Sleeper todavía' : fin ? 'Semana terminada' : started ? 'En juego' : 'Por jugar';
+    document.getElementById('lv-games').innerHTML = `<div class="wk-state">${state}</div>${lines || '<div class="games-pending">Sin juegos.</div>'}`;
+  }
+
+  function bar(L){
+    const el = document.getElementById('lv-bar'); if (!el) return;
+    const ok = !!(L && L.ok);
+    el.className = ok ? 'ok' : '';
+    const t = ok && L.at ? ' · actualizado ' + L.at.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' }) : '';
+    el.innerHTML = `<span class="live-dot"></span>${esc(ok ? L.msg : 'Los marcadores de Sleeper aparecerán aquí desde la semana 12 · mientras tanto se muestra la tabla oficial')}${t}`;
+  }
+
+  function render(L){
+    const r = run(L);
+    bar(L); renderTable(r, L); renderGames(r, L);
+  }
+  window.__onLive = [render];
+  render(window.__live ? window.__live.live : null);
+  window.__render_vivo = render;
 })();
 
 </script>
