@@ -988,7 +988,7 @@
     <section>
       <div class="section-head">
         <h2 id="upcoming-title">Próximos Juegos</h2>
-        <span class="note">Cruces Cuca vs Jesus · sorteo fijo · cuentan para la tabla</span>
+        <span class="note">Cruces Cuca vs Jesus por ranking de liga (# = lugar dentro de su liga) · cuentan para la tabla</span>
       </div>
       <div id="upcoming-games"></div>
     </section>
@@ -1455,13 +1455,15 @@ function renderGamesSection(containerId, data, mode, expectedWeek, pendingMsg){
 document.getElementById('results-title').textContent = `Resultados · Semana ${currentWeek}`;
 document.getElementById('upcoming-title').textContent = 'Próximos Juegos';
 renderGamesSection('results-games', resultsMatchups, 'results', currentWeek, 'Resultados por publicar.');
-// Semanas 12–14: juegos cruzados Cuca vs Jesus, sorteados una sola vez (cuentan para la tabla)
-const crossSchedule = {"12": [["Pending Wiki", "TEPOS"], ["Real Bañil", "Luisramon98"], ["SteelersLaguna", "DanielAD85"], ["Beard of Steel", "RODCKERS"], ["Dr Pat", "pablogutig"], ["CacaLoapanPushers", "Steel Armonico"], ["Galacticos", "Martha"], ["jesusarias97", "SanPancho85"], ["Los Rifles 2.0", "THE BOYZ"], ["Color Esperanza", "Peor Pesadilla"], ["Capitan JC", "Los Marrones"]], "13": [["Pending Wiki", "Peor Pesadilla"], ["Real Bañil", "Los Marrones"], ["SteelersLaguna", "TEPOS"], ["Beard of Steel", "Luisramon98"], ["Dr Pat", "DanielAD85"], ["CacaLoapanPushers", "RODCKERS"], ["Galacticos", "pablogutig"], ["jesusarias97", "Steel Armonico"], ["Los Rifles 2.0", "Martha"], ["Color Esperanza", "SanPancho85"], ["Capitan JC", "THE BOYZ"]], "14": [["Pending Wiki", "Steel Armonico"], ["Real Bañil", "Martha"], ["SteelersLaguna", "SanPancho85"], ["Beard of Steel", "THE BOYZ"], ["Dr Pat", "Peor Pesadilla"], ["CacaLoapanPushers", "Los Marrones"], ["Galacticos", "TEPOS"], ["jesusarias97", "Luisramon98"], ["Los Rifles 2.0", "DanielAD85"], ["Color Esperanza", "RODCKERS"], ["Capitan JC", "pablogutig"]]};
+// Semanas 12–14: juegos cruzados Cuca vs Jesus por ranking de liga (S12: 1 vs 11, S13: 1 vs 10, S14: 1 vs 9; cuentan para la tabla)
+const crossSchedule = {"12": [["Galacticos", "Martha"], ["Beard of Steel", "RODCKERS"], ["Dr Pat", "SanPancho85"], ["Los Rifles 2.0", "Luisramon98"], ["Color Esperanza", "Steel Armonico"], ["Real Bañil", "THE BOYZ"], ["CacaLoapanPushers", "TEPOS"], ["SteelersLaguna", "Peor Pesadilla"], ["Pending Wiki", "DanielAD85"], ["Capitan JC", "pablogutig"], ["jesusarias97", "Los Marrones"]], "13": [["Galacticos", "RODCKERS"], ["Beard of Steel", "SanPancho85"], ["Dr Pat", "Luisramon98"], ["Los Rifles 2.0", "Steel Armonico"], ["Color Esperanza", "THE BOYZ"], ["Real Bañil", "TEPOS"], ["CacaLoapanPushers", "Peor Pesadilla"], ["SteelersLaguna", "DanielAD85"], ["Pending Wiki", "pablogutig"], ["Capitan JC", "Los Marrones"], ["jesusarias97", "Martha"]], "14": [["Galacticos", "SanPancho85"], ["Beard of Steel", "Luisramon98"], ["Dr Pat", "Steel Armonico"], ["Los Rifles 2.0", "THE BOYZ"], ["Color Esperanza", "TEPOS"], ["Real Bañil", "Peor Pesadilla"], ["CacaLoapanPushers", "DanielAD85"], ["SteelersLaguna", "pablogutig"], ["Pending Wiki", "Los Marrones"], ["Capitan JC", "Martha"], ["jesusarias97", "RODCKERS"]]};
 (function(){
   const el = document.getElementById('upcoming-games');
   const dot = c => `<span class="lg-dot lg-${c}"></span>`;
   const rec = n => { const t = teamByName[n]; return t ? `<small>${t.wins}-${t.losses}</small>` : ''; };
-  const rk = n => { const t = rankedCombined.find(x => x.name === n); return t ? `<span class="rk" title="Lugar en la tabla general">${t.overallRank}</span>` : ''; };
+  const leagueRank = {};
+  ['cardinal', 'slate'].forEach(tg => rankedCombined.filter(t => t.tag === tg).sort((a, b) => a.overallRank - b.overallRank).forEach((t, i) => { leagueRank[t.name] = i + 1; }));
+  const rk = n => leagueRank[n] ? `<span class="rk" title="Lugar dentro de su liga">${leagueRank[n]}</span>` : '';
   const nextEl = document.getElementById('next-games'), nw = currentWeek + 1;
   if (nextEl) {
     document.getElementById('next-title').textContent = `Próximos Juegos · Semana ${nw}`;
