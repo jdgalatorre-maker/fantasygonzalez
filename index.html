@@ -1048,7 +1048,7 @@
 </div>
 
 
-<div id="build-stamp" style="text-align:center;font-size:10px;opacity:.5;margin:18px 0 10px;letter-spacing:.05em;">Versión: 25 nov 2026 · 10:05 · calendario por ranking de liga</div>
+<div id="build-stamp" style="text-align:center;font-size:10px;opacity:.5;margin:18px 0 10px;letter-spacing:.05em;">Versión: 25 nov 2026 · 10:30 · ranking de liga en los juegos</div>
 <script>
 /* =========================================================
    EDITA ESTOS DATOS con tus ligas reales.
@@ -2306,9 +2306,9 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       const c = cell(name), pts = c && c.pts != null ? c.pts : null, pj = c && c.proj != null && !fin ? c.proj : null;
       return { name, pts, pj };
     };
-    const livePos = {}; r.order.forEach((i, pos) => { livePos[base[i].name] = pos + 1; });
+    const livePos = {}, cnt = {}; r.order.forEach(i => { const tg = base[i].tag; cnt[tg] = (cnt[tg] || 0) + 1; livePos[base[i].name] = cnt[tg]; }); // lugar actual dentro de su liga
     const recOf = nm => { const t = base[idx[nm]]; return t ? t.w + '-' + t.l : ''; };
-    const sideHTML = (x, lg, lead) => `<div class="lvside ${lg} ${lead ? 'lead' : ''}" data-team="${esc(x.name)}" title="Ver alineación"><div class="lvname"><span class="rk" title="Lugar actual en la clasificación en vivo">${livePos[x.name] || ''}</span><span class="lg-dot ${lg === 'lgc-cardinal' ? 'lg-cardinal' : 'lg-slate'}"></span>${esc(x.name)}<small>${recOf(x.name)}${x.pj != null && x.pj > 0 ? ' · proy. ' + x.pj.toFixed(1) : ''}</small></div><div class="lvscore" data-nm="${esc(x.name)}">${x.pts == null ? '—' : x.pts.toFixed(2)}</div></div>`;
+    const sideHTML = (x, lg, lead) => `<div class="lvside ${lg} ${lead ? 'lead' : ''}" data-team="${esc(x.name)}" title="Ver alineación"><div class="lvname"><span class="rk" title="Lugar actual dentro de su liga">${livePos[x.name] || ''}</span><span class="lg-dot ${lg === 'lgc-cardinal' ? 'lg-cardinal' : 'lg-slate'}"></span>${esc(x.name)}<small>${recOf(x.name)}${x.pj != null && x.pj > 0 ? ' · proy. ' + x.pj.toFixed(1) : ''}</small></div><div class="lvscore" data-nm="${esc(x.name)}">${x.pts == null ? '—' : x.pts.toFixed(2)}</div></div>`;
     const lines = (crossSchedule[wk] || []).map(([a, b]) => {
       const A = side(a), B = side(b);
       const has = A.pts != null && B.pts != null && A.pts + B.pts > 0;
